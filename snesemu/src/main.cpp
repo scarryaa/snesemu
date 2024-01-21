@@ -1,6 +1,11 @@
 #include <iostream>
+#include "../include/emulator.hpp"
+#include "../include/logger.hpp"
 
 int main(void)
 {
-	std::cout << "Hello world!" << std::endl;
+	Logger::getInstance()->openLog("log.txt");
+
+	Emulator emulator;
+	emulator.loadRom("roms/Super Mario World (U) [!].smc");
 }

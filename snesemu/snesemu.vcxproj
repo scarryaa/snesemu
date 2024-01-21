@@ -21,14 +21,18 @@
   <ItemGroup>
     <ClCompile Include="src\cpu.cpp" />
     <ClCompile Include="src\emulator.cpp" />
+    <ClCompile Include="src\generic_memory_command.cpp" />
+    <ClCompile Include="src\logger.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\memory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\cpu.hpp" />
     <ClInclude Include="include\emulator.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".gitignore" />
+    <ClInclude Include="include\generic_memory_command.hpp" />
+    <ClInclude Include="include\logger.hpp" />
+    <ClInclude Include="include\memory.hpp" />
+    <ClInclude Include="include\memory_command.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
