@@ -8,7 +8,7 @@ class Cpu
 public:
 
 private:
-	uint8_t E_FLAG;
+	bool pbr;
 
 	// Registers
 	struct {
@@ -57,7 +57,9 @@ private:
 	uint32_t ADDR_getDirectPageIndirectIndexedY();
 	uint32_t ADDR_getDirectPageIndirectLongIndexedY();
 	uint32_t ADDR_getStackRelative();
+	uint32_t ADDR_getStackRelativeIndirectIndexedY();
 
+	// Instructions
 };
 
 #endif
