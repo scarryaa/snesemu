@@ -2,13 +2,18 @@
 #define CPU_HPP
 
 #include <stdint.h>
+#include "memory.hpp"
+#include "interrupt.hpp"
 
 class Cpu
 {
 public:
+	Cpu(Memory* memory) {}
 
 private:
 	bool pbr;
+	Memory memory;
+	Interrupts interrupt;
 
 	// Registers
 	struct {
@@ -37,29 +42,37 @@ private:
 	} regs;
 
 	// Addressing Modes
-	uint32_t ADDR_getImm_8();
-	uint32_t ADDR_getImm_16();
-	uint32_t ADDR_getAbs();
-	uint32_t ADDR_getAbsLong();
-	uint32_t ADDR_getAbsIndexedX();
-	uint32_t ADDR_getAbsIndexedY();
-	uint32_t ADDR_getAbsLongIndexedX();
-	uint32_t ADDR_getAbsIndirect();
-	uint32_t ADDR_getAbsIndirectLong();
-	uint32_t ADDR_getAbsIndexedIndirectX();
-	uint32_t ADDR_getLong();
-	uint32_t ADDR_getDirectPage();
-	uint32_t ADDR_getDirectPageIndexedX();
-	uint32_t ADDR_getDirectPageIndexedY();
-	uint32_t ADDR_getDirectPageIndirect();
-	uint32_t ADDR_getDirectPageIndirectLong();
-	uint32_t ADDR_getDirectPageIndirectX();
-	uint32_t ADDR_getDirectPageIndirectIndexedY();
-	uint32_t ADDR_getDirectPageIndirectLongIndexedY();
-	uint32_t ADDR_getStackRelative();
-	uint32_t ADDR_getStackRelativeIndirectIndexedY();
+	uint32_t getImm_8();
+	uint32_t getImm_16();
+	uint32_t getAbs();
+	uint32_t getAbsLong();
+	uint32_t getAbsIndexedX();
+	uint32_t getAbsIndexedY();
+	uint32_t getAbsLongIndexedX();
+	uint32_t getAbsIndirect();
+	uint32_t getAbsIndirectLong();
+	uint32_t getAbsIndexedIndirectX();
+	uint32_t getLong();
+	uint32_t getDirectPage();
+	uint32_t getDirectPageIndexedX();
+	uint32_t getDirectPageIndexedY();
+	uint32_t getDirectPageIndirect();
+	uint32_t getDirectPageIndirectLong();
+	uint32_t getDirectPageIndirectX();
+	uint32_t getDirectPageIndirectIndexedY();
+	uint32_t getDirectPageIndirectLongIndexedY();
+	uint32_t getStackRelative();
+	uint32_t getStackRelativeIndirectIndexedY();
 
 	// Instructions
+	uint8_t step();
+	uint8_t BRK(uint32_t(Cpu::*f)(), uint8_t cycles);
+	uint8_t COP(uint32_t(Cpu::*f)(), uint8_t cycles);
+	uint8_t TSB(uint32_t(Cpu::*f)(), uint8_t cycles);
+	uint8_t ORA(uint32_t(Cpu::*f)(), uint8_t cycles);
+	uint8_t PHP(uint8_t cycles);
+	uint8_t ASL(uint32_t(Cpu::*f)(), uint8_t cycles);
+	uint8_t ASL(uint8_t cycles);
 };
 
 #endif

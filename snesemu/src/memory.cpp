@@ -1,6 +1,5 @@
 #include "../include/memory.hpp"
 #include "../include/logger.hpp"
-#include "../include/generic_memory_command.hpp"
 
 uint8_t Memory::read(uint32_t address) {
     // Mask the address to get bank and offset within the bank
@@ -15,17 +14,27 @@ uint8_t Memory::read(uint32_t address) {
         }
         else if (offset >= 0x2100 && offset <= 0x21FF) {
             // PPU1, APU, hardware registers
-            return apuAndHardware[offset - 0x2100];
+            return ppuAPUAndHardware[offset - 0x2100];
         }
-        else if (offset >= 0x8000) {
+        else if (offset >= 0x3000 && offset <= 0x3FFF) {
+            // DSP, SuperFX, hardware registers
+            return dspSuperFXAndHardware[offset - 0x3000];
+        }
+        else if (offset >= 0x4000 && offset <= 0x40FF) {
+            // old style joypad registers
+            return oldJoypad[offset - 0x4000];
+        } else if (offset >= 0x4200 && offset <= 0x44FF)
+        {
+            // DMA, PPU2, hardware registers
+            return dmaPPU2AndHardware[offset - 0x4200];
+        } else if (offset >= 0x8000) {
             // LoROM section
             return loRom[(bank * 0x8000) + (offset - 0x8000)];
         }
-        // TODO other regions
     }
     else if (bank >= 0x80 && bank <= 0xBF) {
         // Mirror of $00–$3F
-        return read((bank - 0x80) << 16 | offset);
+        return read(((bank - 0x80) << 16) | offset);
     }
     else if (bank >= 0x70 && bank <= 0x7D) {
         if (offset < 0x8000) {
@@ -58,26 +67,20 @@ void Memory::write(uint32_t address, uint8_t value)
         }
         else if (offset >= 0x2100 && offset <= 0x21FF) {
             // PPU1, APU, hardware registers
-            apuAndHardware[offset - 0x2100] = value;
-        }
-        else if (offset >= 0x8000) {
-            // LoROM section
-            loRom[(bank * 0x8000) + (offset - 0x8000)] = value;
+            ppuAPUAndHardware[offset - 0x2100] = value;
         }
         // TODO other regions
     }
     else if (bank >= 0x80 && bank <= 0xBF) {
         // Mirror of $00–$3F
-        write((bank - 0x80) << 16 | offset, value);
+        uint8_t addr = ((bank - 0x80) << 16) | offset;
+        if (!(addr >= 0x00 && addr <= 0x3F)) return;
+        write(((bank - 0x80) << 16) | offset, value);
     }
     else if (bank >= 0x70 && bank <= 0x7D) {
         if (offset < 0x8000) {
             // Cartridge SRAM
             sram[(bank - 0x70) * 0x8000 + offset] = value;
-        }
-        else {
-            // LoROM section
-            loRom[((bank - 0x70) * 0x8000) + (offset - 0x8000)] = value;
         }
     }
     // TODO other banks and offsets
@@ -88,5 +91,32 @@ void Memory::write(uint32_t address, uint8_t value)
 
 void Memory::loadRom(std::string path)
 {
-	
+    std::ifstream file;
+    file.open(path, std::ios::ate);
+    size_t fileSize = file.tellg();
+    file.seekg(0);
+    size_t totalBytesRead = 0;
+
+    const size_t BUFFER_SIZE = 4096;
+    std::vector<char> buffer(BUFFER_SIZE);
+
+    while (file.tellg() < fileSize) {
+        file.read(&buffer[0], BUFFER_SIZE);
+        size_t bytesRead = file.gcount();
+
+        for (size_t i = 0; i < bytesRead; ++i) {
+            size_t bank = totalBytesRead / 0x8000;
+            size_t addr = (totalBytesRead % 0x8000) + 0x8000;
+            size_t index = (bank * 0x4000) + (addr - 0x8000);
+
+            if (index < ROM_SIZE) {
+                loRom[index] = buffer[i];
+            }
+            else {
+                throw std::runtime_error("Index exceeds ROM size.");
+            }
+
+            ++totalBytesRead;
+        }
+    }
 }

@@ -21,7 +21,7 @@ private:
 	std::ofstream logFile;
 	static Logger* instance;
 
-	Logger();
+	Logger() {}
 };
 
 #endif
