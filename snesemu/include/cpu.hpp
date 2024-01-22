@@ -8,9 +8,13 @@
 class Cpu
 {
 public:
-	Cpu(Memory* memory) {}
+	Cpu(Memory* memory) {
+		regs.SP = INITIAL_STACK_POINTER;
+	}
 
 private:
+	bool E; // Emulation mode
+	static constexpr uint16_t INITIAL_STACK_POINTER = 0x01FF;
 	bool pbr;
 	Memory memory;
 	Interrupts interrupt;
@@ -36,10 +40,19 @@ private:
 			uint8_t M;
 			uint8_t V;
 			uint8_t N;
-			uint8_t B;
-			uint8_t E;
 		} P;
 	} regs;
+
+	// Stack
+	void push(uint8_t value) {
+		memory.write(regs.SP, value);
+		regs.SP--;
+	}
+
+	uint8_t pull() {
+		regs.SP++;
+		return memory.read(regs.SP);
+	}
 
 	// Addressing Modes
 	uint32_t getImm_8();
@@ -73,6 +86,18 @@ private:
 	uint8_t PHP(uint8_t cycles);
 	uint8_t ASL(uint32_t(Cpu::*f)(), uint8_t cycles);
 	uint8_t ASL(uint8_t cycles);
+	uint8_t BPL(uint8_t cycles);
+	uint8_t TRB(uint32_t(Cpu::* f)(), uint8_t cycles);
+	uint8_t CLC(uint8_t cycles);
+	uint8_t JSR(uint32_t(Cpu::* f)(), uint8_t cycles);
+	uint8_t AND(uint32_t(Cpu::* f)(), uint8_t cycles);
+	uint8_t JSL(uint32_t(Cpu::* f)(), uint8_t cycles);
+	uint8_t BIT(uint32_t(Cpu::* f)(), uint8_t cycles);
+	uint8_t BIT_Imm(uint32_t(Cpu::* f)(), uint8_t cycles);
+	uint8_t ROL(uint32_t(Cpu::* f)(), uint8_t cycles);
+	uint8_t PLP(uint8_t cycles);
+	uint8_t BMI(uint8_t cycles);
+	uint8_t SEC(uint8_t cycles);
 };
 
 #endif
