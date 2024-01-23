@@ -192,6 +192,25 @@ uint8_t Cpu::step() {
 	uint8_t dpL = (regs.D & 0x00FF) ? 1 : 0;
 	uint8_t xFlagInv = !regs.P.X ? 1 : 0;
 
+	uint8_t irq_cycles = 0;
+
+	// Check for interrupts
+	if (interrupt != Interrupts::NONE)
+	{
+		irq_cycles = Interrupt::handle_interrupt(interrupt, this, &memory);
+		this->interrupt = Interrupts::NONE;
+		return irq_cycles;
+	}
+
+	while (stopped || (wai && regs.P.I == 1)) {
+		// Wait for interrupt to wake up
+		if (interrupt != Interrupts::NONE) {
+			stopped = false;
+			wai = false;
+			break;
+		}
+	}
+
 	// Notes
 	// M,X = 1 8-bit (immediate only) +1 cycle
 	// M,X = 0 16-bit (immediate only)
@@ -454,6 +473,8 @@ uint8_t Cpu::step() {
 	case 0xFE: return INC(&Cpu::getAbsIndexedX, 7 + mFlagInv_2 + pbr);
 	case 0xFF: return SBC(&Cpu::getAbsLongIndexedX, 5 + mFlagInv);
 	}
+
+	return 0;
 }
 
 uint8_t Cpu::BRK(uint32_t(Cpu::*f)(), uint8_t cycles) {

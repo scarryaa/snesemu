@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\cpu.cpp" />
     <ClCompile Include="src\emulator.cpp" />
+    <ClCompile Include="src\interrupt.cpp" />
     <ClCompile Include="src\logger.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory.cpp" />

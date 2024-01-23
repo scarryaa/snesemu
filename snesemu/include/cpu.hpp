@@ -12,6 +12,123 @@ public:
 		regs.SP = INITIAL_STACK_POINTER;
 	}
 
+	// Stack
+	void push(uint8_t value) {
+		memory.write(regs.SP, value);
+		regs.SP--;
+	}
+
+	uint8_t pull() {
+		regs.SP++;
+		return memory.read(regs.SP);
+	}
+
+	uint16_t getPC() {
+		return regs.PC;
+	}
+
+	void setPC(uint16_t value) {
+		regs.PC = value;
+	}
+
+	uint8_t getP() {
+		uint8_t status = 0;
+		status |= regs.P.C;
+		status |= regs.P.Z << 1;
+		status |= regs.P.I << 2;
+		status |= regs.P.D << 3;
+		status |= regs.P.X << 4;
+		status |= regs.P.M << 5;
+		status |= regs.P.V << 6;
+		status |= regs.P.N << 7;
+
+		return status;
+	}
+
+	// Interrupt Vectors
+	static const int IRQ_VECTOR_NATIVE = 0xFFEE;
+	static const int NMI_VECTOR_NATIVE = 0xFFEA;
+	static const int ABORT_VECTOR_NATIVE = 0xFFE8;
+	static const int BRK_VECTOR_NATIVE = 0xFFE6;
+	static const int COP_VECTOR_NATIVE = 0xFFE4;
+
+	static const int IRQ_VECTOR_EMU = 0xFFFE;
+	static const int BRK_VECTOR_EMU = 0xFFFE;
+	static const int RESET_VECTOR_EMU = 0xFFFC;
+	static const int NMI_VECTOR_EMU = 0xFFFA;
+	static const int ABORT_VECTOR_EMU = 0xFFF8;
+	static const int COP_VECTOR_EMU = 0xFFF4;
+
+	// Flag getters
+	uint8_t getE() {
+		return E;
+	}
+
+	uint8_t getC() {
+		return regs.P.C;
+	}
+
+	uint8_t getZ() {
+		return regs.P.Z;
+	}
+
+	uint8_t getI() {
+		return regs.P.I;
+	}
+
+	uint8_t getD() {
+		return regs.P.D;
+	}
+
+	uint8_t getX() {
+		return regs.P.X;
+	}
+
+	uint8_t getM() {
+		return regs.P.M;
+	}
+
+	uint8_t getV() {
+		return regs.P.V;
+	}
+
+	uint8_t getN() {
+		return regs.P.N;
+	}
+
+	// Flag setters
+	void setC(uint8_t value) {
+		regs.P.C = value;
+	}
+
+	void setZ(uint8_t value) {
+		regs.P.Z = value;
+	}
+
+	void setI(uint8_t value) {
+		regs.P.I = value;
+	}
+
+	void setD(uint8_t value) {
+		regs.P.D = value;
+	}
+
+	void setX(uint8_t value) {
+		regs.P.X = value;
+	}
+
+	void setM(uint8_t value) {
+		regs.P.M = value;
+	}
+
+	void setV(uint8_t value) {
+		regs.P.V = value;
+	}
+
+	void setN(uint8_t value) {
+		regs.P.N = value;
+	}
+
 private:
 	bool E; // Emulation mode
 	static constexpr uint16_t INITIAL_STACK_POINTER = 0x01FF;
@@ -44,17 +161,6 @@ private:
 			uint8_t N;
 		} P;
 	} regs;
-
-	// Stack
-	void push(uint8_t value) {
-		memory.write(regs.SP, value);
-		regs.SP--;
-	}
-
-	uint8_t pull() {
-		regs.SP++;
-		return memory.read(regs.SP);
-	}
 
 	// Addressing Modes
 	uint32_t getImm_8();
