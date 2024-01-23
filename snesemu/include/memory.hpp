@@ -6,14 +6,15 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "cartridge.hpp"
 
 class Memory
 {
 public:
-    Memory() :
+    Memory(Cartridge *cartridge) :
+        cartridge(cartridge),
         wram(WRAM_SIZE),
         sram(SRAM_SIZE),
-        loRom(ROM_SIZE),
         ppuRegisters(0x100),
         ppuAPUAndHardware(0x100),
         dmaAndPPU2(0x300),
@@ -24,12 +25,10 @@ public:
     uint8_t read(uint32_t address);
     void write(uint32_t address, uint8_t value);
 
-    void loadRom(std::string path);
-
 private:
+    Cartridge *cartridge;
     std::vector<uint8_t> wram;
     std::vector<uint8_t> sram;
-    std::vector<uint8_t> loRom;
 
     std::vector<uint8_t> ppuRegisters;
     std::vector<uint8_t> ppuAPUAndHardware;
@@ -40,7 +39,6 @@ private:
 
     constexpr static size_t WRAM_SIZE = 0x20000;   // 128KB WRAM
     constexpr static size_t SRAM_SIZE = 0x8000;    // 32KB SRAM
-    constexpr static size_t ROM_SIZE = 0x400000;   // 4MB ROM
 };
 
 #endif

@@ -8,7 +8,7 @@
 class Cpu
 {
 public:
-	Cpu(Memory* memory) {
+	Cpu(Memory* memory) : memory(memory) {
 		regs.SP = INITIAL_STACK_POINTER;
 	}
 
@@ -16,13 +16,13 @@ public:
 
 	// Stack
 	void push(uint8_t value) {
-		memory.write(regs.SP, value);
+		memory->write(regs.SP, value);
 		regs.SP--;
 	}
 
 	uint8_t pull() {
 		regs.SP++;
-		return memory.read(regs.SP);
+		return memory->read(regs.SP);
 	}
 
 	uint16_t getPC() {
@@ -139,7 +139,7 @@ private:
 	bool pbr;
 	bool wai;
 	bool stopped;
-	Memory memory;
+	Memory* memory;
 	Interrupts interrupt;
 
 	// Registers

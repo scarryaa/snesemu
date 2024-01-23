@@ -8,7 +8,7 @@ int main(int argv, char** args)
 
 	Emulator emulator;
 	emulator.loadRom("roms/Super Mario World (U) [!].smc");
-	/*emulator.set_PC_to_reset_vector();*/
+	emulator.setPCToResetVector();
 	emulator.run();
 
 	return 1;

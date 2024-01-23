@@ -19,20 +19,25 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\cartridge.cpp" />
     <ClCompile Include="src\cpu.cpp" />
     <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="src\interrupt.cpp" />
     <ClCompile Include="src\logger.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory.cpp" />
+    <ClCompile Include="src\ppu.cpp" />
     <ClCompile Include="src\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\cartridge.hpp" />
     <ClInclude Include="include\cpu.hpp" />
     <ClInclude Include="include\emulator.hpp" />
     <ClInclude Include="include\interrupt.hpp" />
     <ClInclude Include="include\logger.hpp" />
     <ClInclude Include="include\memory.hpp" />
+    <ClInclude Include="include\ppu.hpp" />
+    <ClInclude Include="include\rom_type.hpp" />
     <ClInclude Include="include\window.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

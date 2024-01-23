@@ -15,33 +15,33 @@ uint32_t Cpu::getImm_16()
 uint32_t Cpu::getAbs()
 {
 	regs.PC += 2;
-	uint32_t addr = ((memory.read((regs.PBR << 16) | 
-		regs.PC) << 8) | memory.read((regs.PBR << 16) | regs.PC - 1));
+	uint32_t addr = ((memory->read((regs.PBR << 16) | 
+		regs.PC) << 8) | memory->read((regs.PBR << 16) | regs.PC - 1));
 	return (regs.DBR << 16) | addr;
 }
 
 uint32_t Cpu::getAbsLong()
 {
 	regs.PC += 3;
-	return ((memory.read((regs.PBR << 16) | regs.PC) << 16) | 
-		(memory.read((regs.PBR << 16) | regs.PC - 1) << 8) | 
-		memory.read((regs.PBR << 16) | regs.PC - 2));
+	return ((memory->read((regs.PBR << 16) | regs.PC) << 16) | 
+		(memory->read((regs.PBR << 16) | regs.PC - 1) << 8) | 
+		memory->read((regs.PBR << 16) | regs.PC - 2));
 }
 
 uint32_t Cpu::getAbsIndexedX()
 {
 	regs.PC += 2;
-	uint16_t addr = ((memory.read((regs.PBR << 16) | regs.PC) <<
-		8) | memory.read((regs.PBR << 16) | regs.PC - 1));
+	uint16_t addr = ((memory->read((regs.PBR << 16) | regs.PC) <<
+		8) | memory->read((regs.PBR << 16) | regs.PC - 1));
 	pbr = (addr & 0xFF00) != ((addr + regs.X) & 0xFF00);
 	addr += regs.X;
 	return (regs.DBR << 16) | addr;
 }
 
 uint32_t Cpu::getAbsIndexedY() {
-	uint16_t lowByte = memory.read((regs.PBR << 16) | regs.PC);
+	uint16_t lowByte = memory->read((regs.PBR << 16) | regs.PC);
 	regs.PC++;
-	uint16_t highByte = memory.read((regs.PBR << 16) | regs.PC);
+	uint16_t highByte = memory->read((regs.PBR << 16) | regs.PC);
 	regs.PC++;
 
 	uint16_t addr = (highByte << 8) | lowByte;
@@ -54,105 +54,105 @@ uint32_t Cpu::getAbsIndexedY() {
 uint32_t Cpu::getAbsLongIndexedX()
 {
 	regs.PC += 3;
-	return ((memory.read((regs.PBR << 16) | regs.PC) <<
-		16) | (memory.read((regs.PBR << 16) | regs.PC - 1) << 8) |
-		memory.read((regs.PBR << 16) | regs.PC - 2)) + regs.X;
+	return ((memory->read((regs.PBR << 16) | regs.PC) <<
+		16) | (memory->read((regs.PBR << 16) | regs.PC - 1) << 8) |
+		memory->read((regs.PBR << 16) | regs.PC - 2)) + regs.X;
 }
 
 uint32_t Cpu::getAbsIndirect()
 {
 	regs.PC += 2;
-	uint8_t lo = memory.read((regs.PBR << 16) | regs.PC - 1);
-	uint8_t hi = memory.read((regs.PBR << 16) | regs.PC);
+	uint8_t lo = memory->read((regs.PBR << 16) | regs.PC - 1);
+	uint8_t hi = memory->read((regs.PBR << 16) | regs.PC);
 	uint16_t addr = (hi << 8) | lo;
-	uint8_t i_lo = memory.read(addr);
-	uint8_t i_hi = memory.read(addr + 1);
+	uint8_t i_lo = memory->read(addr);
+	uint8_t i_hi = memory->read(addr + 1);
 	return (regs.PBR << 16) | (i_hi << 8) | i_lo;
 }
 
 uint32_t Cpu::getAbsIndirectLong()
 {
 	regs.PC += 2;
-	uint8_t lo = memory.read((regs.PBR << 16) | regs.PC - 1);
-	uint8_t hi = memory.read((regs.PBR << 16) | regs.PC);
+	uint8_t lo = memory->read((regs.PBR << 16) | regs.PC - 1);
+	uint8_t hi = memory->read((regs.PBR << 16) | regs.PC);
 	uint16_t addr = (hi << 8) | lo;
-	uint8_t i_lo = memory.read(addr);
-	uint8_t i_hi = memory.read(addr + 1);
-	regs.PBR = memory.read(addr + 2);
+	uint8_t i_lo = memory->read(addr);
+	uint8_t i_hi = memory->read(addr + 1);
+	regs.PBR = memory->read(addr + 2);
 	return (regs.PBR << 16) | (i_hi << 8) | i_lo;
 }
 
 uint32_t Cpu::getAbsIndexedIndirectX()
 {
 	regs.PC += 2;
-	uint8_t lo = memory.read((regs.PBR << 16) | regs.PC - 1);
-	uint8_t hi = memory.read((regs.PBR << 16) | regs.PC);
+	uint8_t lo = memory->read((regs.PBR << 16) | regs.PC - 1);
+	uint8_t hi = memory->read((regs.PBR << 16) | regs.PC);
 	uint32_t addr = (hi << 8) | lo;
-	uint8_t i_lo = memory.read(addr);
-	uint8_t i_hi = memory.read(addr + 1);
+	uint8_t i_lo = memory->read(addr);
+	uint8_t i_hi = memory->read(addr + 1);
 	return (regs.PBR << 16) | (i_hi) << 8 | i_lo;
 }
 
 uint32_t Cpu::getLong()
 {
 	regs.PC += 3;
-	return (memory.read((regs.PBR << 16) | regs.PC) << 16) |
-		(memory.read((regs.PBR << 16) | regs.PC - 1) << 8) |
-		memory.read((regs.PBR << 16) | regs.PC - 2);
+	return (memory->read((regs.PBR << 16) | regs.PC) << 16) |
+		(memory->read((regs.PBR << 16) | regs.PC - 1) << 8) |
+		memory->read((regs.PBR << 16) | regs.PC - 2);
 }
 
 uint32_t Cpu::getDirectPage()
 {
 	regs.PC += 1;
-	return memory.read((regs.PBR << 16) | regs.PC) + regs.D;
+	return memory->read((regs.PBR << 16) | regs.PC) + regs.D;
 }
 
 uint32_t Cpu::getDirectPageIndexedX()
 {
 	regs.PC++;
-	return memory.read((regs.PBR << 16) | regs.PC) + regs.X;
+	return memory->read((regs.PBR << 16) | regs.PC) + regs.X;
 }
 
 uint32_t Cpu::getDirectPageIndexedY()
 {
 	regs.PC++;
-	return memory.read((regs.PBR << 16) | regs.PC) + regs.Y;
+	return memory->read((regs.PBR << 16) | regs.PC) + regs.Y;
 }
 
 uint32_t Cpu::getDirectPageIndirect()
 {
 	regs.PC++;
-	uint8_t dp_index = memory.read(((regs.PBR << 16) | regs.PC)) + regs.D;
-	uint32_t dp_addr = (memory.read(dp_index + 2) << 16) 
-		| (memory.read(dp_index));
+	uint8_t dp_index = memory->read(((regs.PBR << 16) | regs.PC)) + regs.D;
+	uint32_t dp_addr = (memory->read(dp_index + 2) << 16) 
+		| (memory->read(dp_index));
 	return (regs.DBR << 16) | dp_addr;
 }
 
 uint32_t Cpu::getDirectPageIndirectLong()
 {
 	regs.PC++;
-	uint8_t dp_index = memory.read(((regs.PBR << 16) | regs.PC)) + regs.D;
-	uint32_t dp_addr = (memory.read(dp_index + 2) << 16) |
-		(memory.read(dp_index + 1) << 8) | memory.read(dp_index);
+	uint8_t dp_index = memory->read(((regs.PBR << 16) | regs.PC)) + regs.D;
+	uint32_t dp_addr = (memory->read(dp_index + 2) << 16) |
+		(memory->read(dp_index + 1) << 8) | memory->read(dp_index);
 	return dp_addr;
 }
 
 uint32_t Cpu::getDirectPageIndirectX()
 {
 	regs.PC++;
-	uint8_t dp_index = memory.read(((regs.PBR << 16) | regs.PC) + regs.D) + regs.X;
-	uint16_t dp_addr = (memory.read(dp_index + 1) << 8) |
-		memory.read(dp_index);
+	uint8_t dp_index = memory->read(((regs.PBR << 16) | regs.PC) + regs.D) + regs.X;
+	uint16_t dp_addr = (memory->read(dp_index + 1) << 8) |
+		memory->read(dp_index);
 	return (regs.DBR << 16) | dp_addr;
 }
 
 uint32_t Cpu::getDirectPageIndirectIndexedY()
 {
 	regs.PC++;
-	uint8_t dp_index = memory.read(((regs.PBR << 16) |
+	uint8_t dp_index = memory->read(((regs.PBR << 16) |
 		regs.PC)) + regs.D;
-	uint32_t dp_addr = (regs.DBR << 16) | (memory.read(dp_index + 1) << 8) | 
-		memory.read(dp_index);
+	uint32_t dp_addr = (regs.DBR << 16) | (memory->read(dp_index + 1) << 8) | 
+		memory->read(dp_index);
 	pbr = (dp_addr & 0xFF00) != ((dp_addr + regs.Y) & 0xFF00);
 	dp_addr += regs.Y;
 	return dp_addr;
@@ -161,10 +161,10 @@ uint32_t Cpu::getDirectPageIndirectIndexedY()
 uint32_t Cpu::getDirectPageIndirectLongIndexedY()
 {
 	regs.PC++;
-	uint8_t dp_index = memory.read(((regs.PBR << 16) | regs.PC)) + regs.D;
-	uint32_t dp_addr = (memory.read(dp_index + 2) << 16) |
-		(memory.read(dp_index + 1) << 8) |
-		memory.read(dp_index);
+	uint8_t dp_index = memory->read(((regs.PBR << 16) | regs.PC)) + regs.D;
+	uint32_t dp_addr = (memory->read(dp_index + 2) << 16) |
+		(memory->read(dp_index + 1) << 8) |
+		memory->read(dp_index);
 	pbr = (dp_addr & 0xFF00) != ((dp_addr + regs.Y) & 0xFF00);
 	dp_addr += regs.Y;
 	return dp_addr;
@@ -173,20 +173,20 @@ uint32_t Cpu::getDirectPageIndirectLongIndexedY()
 uint32_t Cpu::getStackRelative()
 {
 	regs.PC++;
-	uint8_t byte = memory.read((regs.PBR << 16) | regs.PC);
+	uint8_t byte = memory->read((regs.PBR << 16) | regs.PC);
 	return regs.SP + byte;
 }
 
 uint32_t Cpu::getStackRelativeIndirectIndexedY()
 {
 	regs.PC++;
-	uint8_t byte = memory.read((regs.PBR << 16) | regs.PC);
-	uint8_t base = memory.read(((regs.DBR << 16) | regs.SP) + byte);
+	uint8_t byte = memory->read((regs.PBR << 16) | regs.PC);
+	uint8_t base = memory->read(((regs.DBR << 16) | regs.SP) + byte);
 	return base + regs.Y;
 }
 
 uint8_t Cpu::step() {
-	uint8_t opcode = memory.read(regs.PC++);
+	uint8_t opcode = memory->read(regs.PC++);
 	uint8_t mFlagInv = !regs.P.M ? 1 : 0;
 	uint8_t mFlagInv_2 = !regs.P.M ? 2 : 0;
 	uint8_t dpL = (regs.D & 0x00FF) ? 1 : 0;
@@ -197,7 +197,7 @@ uint8_t Cpu::step() {
 	// Check for interrupts
 	if (interrupt != Interrupts::NONE)
 	{
-		irq_cycles = Interrupt::handle_interrupt(interrupt, this, &memory);
+		irq_cycles = Interrupt::handle_interrupt(interrupt, this, memory);
 		this->interrupt = Interrupts::NONE;
 		return irq_cycles;
 	}
@@ -503,16 +503,16 @@ uint8_t Cpu::TSB(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		val = memory.read(addr);
+		val = memory->read(addr);
 		regs.P.Z = (regs.A & val & 0xFF) == 0;
-		memory.write(addr, val | (regs.A & 0xFF));
+		memory->write(addr, val | (regs.A & 0xFF));
 	}
 	else {
 		// 16-bit mode
-		val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.P.Z = (regs.A & val) == 0;
-		memory.write(addr, val | (regs.A & 0xFF));
-		memory.write(addr + 1, (val >> 8) | (regs.A >> 8));
+		memory->write(addr, val | (regs.A & 0xFF));
+		memory->write(addr + 1, (val >> 8) | (regs.A >> 8));
 	}
 
 	return cycles;
@@ -522,7 +522,7 @@ uint8_t Cpu::TSB(uint32_t(Cpu::* f)(), uint8_t cycles) {
 uint8_t Cpu::ORA(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		regs.A = (regs.A & 0xFF00) | ((regs.A & 0x00FF) | val);
 
 		regs.P.N = regs.A & 0x0080 ? 1 : 0;
@@ -531,7 +531,7 @@ uint8_t Cpu::ORA(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.A |= val;
 
 		regs.P.N = regs.A & 0x8000 ? 1 : 0;
@@ -571,18 +571,18 @@ uint8_t Cpu::INC(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read(addr);
+		uint8_t val = memory->read(addr);
 		val++;
-		memory.write(addr, val);
+		memory->write(addr, val);
 
 		regs.P.N = val & 0x80;
 		regs.P.Z = val == 0;
 	}
 	else {
 		// 16-bit mode
-		uint16_t val = memory.read(addr) | memory.read(addr + 1) << 8;
+		uint16_t val = memory->read(addr) | memory->read(addr + 1) << 8;
 		val++;
-		memory.write(addr, val);
+		memory->write(addr, val);
 
 		regs.P.N = val & 0x8000;
 		regs.P.Z = val == 0;
@@ -626,23 +626,23 @@ uint8_t Cpu::ASL(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read(addr);
+		uint8_t val = memory->read(addr);
 		regs.P.C = (val & 0x80) >> 7;
 		val <<= 1;
 
-		memory.write(addr, val);
+		memory->write(addr, val);
 
 		regs.P.N = (val & 0x80) ? 1 : 0;
 		regs.P.Z = val == 0;
 	}
 	else {
 		// 16-bit mode
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.P.C = (val & 0x8000) >> 15;
 		val <<= 1;
 
-		memory.write(addr, val & 0xFF);
-		memory.write(addr + 1, val >> 8);
+		memory->write(addr, val & 0xFF);
+		memory->write(addr + 1, val >> 8);
 
 		regs.P.N = (val & 0x8000) ? 1 : 0;
 		regs.P.Z = val == 0;
@@ -670,7 +670,7 @@ uint8_t Cpu::PHP(uint8_t cycles) {
 }
 
 uint8_t Cpu::BPL(uint8_t cycles) {
-	int8_t offset = memory.read(regs.PC++);
+	int8_t offset = memory->read(regs.PC++);
 
 	if (!regs.P.N) {
 		uint16_t oldPC = regs.PC;
@@ -691,18 +691,18 @@ uint8_t Cpu::TRB(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read(addr);
+		uint8_t val = memory->read(addr);
 		regs.P.Z = (regs.A & val & 0xFF) == 0;
 		uint8_t result = val & ~(regs.A & 0xFF);
-		memory.write(addr, result);
+		memory->write(addr, result);
 	}
 	else {
 		// 16-bit mode
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.P.Z = (regs.A & val) == 0;
 		uint16_t result = val & ~regs.A;
-		memory.write(addr, result & 0xFF);
-		memory.write(addr + 1, result >> 8);
+		memory->write(addr, result & 0xFF);
+		memory->write(addr + 1, result >> 8);
 	}
 
 	return cycles;
@@ -733,7 +733,7 @@ uint8_t Cpu::JSR(uint32_t(Cpu::* f)(), uint8_t cycles) {
 uint8_t Cpu::AND(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		regs.A = (regs.A & 0xFF00) | ((regs.A & 0x00FF) & val);
 
 		regs.P.N = regs.A & 0x0080 ? 1 : 0;
@@ -742,7 +742,7 @@ uint8_t Cpu::AND(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.A &= val;
 
 		regs.P.N = regs.A & 0x8000 ? 1 : 0;
@@ -772,7 +772,7 @@ uint8_t Cpu::JSL(uint32_t(Cpu::* f)(), uint8_t cycles) {
 uint8_t Cpu::BIT(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		uint8_t res = regs.A & val;
 
 		regs.P.N = val & 0x80;
@@ -782,7 +782,7 @@ uint8_t Cpu::BIT(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		uint16_t res = regs.A & val;
 
 		regs.P.N = val & 0x8000;
@@ -823,14 +823,14 @@ uint8_t Cpu::BIT_Imm(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		val = memory.read((this->*f)());
+		val = memory->read((this->*f)());
 		uint8_t res = regs.A & val;
 		regs.P.Z = (res & 0xFF) == 0;
 	}
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		uint16_t res = regs.A & val;
 		regs.P.Z = res == 0;
 	}
@@ -869,7 +869,7 @@ uint8_t Cpu::ROL(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		regs.P.C = (val & 0x80) >> 7;
 		val <<= 1;
 		val |= oldC;
@@ -880,7 +880,7 @@ uint8_t Cpu::ROL(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.P.C = (val & 0x8000) >> 15;
 		val <<= 1;
 		val |= oldC;
@@ -918,7 +918,7 @@ uint8_t Cpu::PLP(uint8_t cycles) {
 }
 
 uint8_t Cpu::BMI(uint8_t cycles) {
-	int8_t offset = memory.read(regs.PC++);
+	int8_t offset = memory->read(regs.PC++);
 
 	if (regs.P.N) {
 		uint16_t oldPC = regs.PC;
@@ -962,7 +962,7 @@ uint8_t Cpu::RTI(uint8_t cycles) {
 uint8_t Cpu::EOR(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 
 		regs.A = (regs.A & 0xFF00) | ((regs.A & 0x00FF) ^ val);
 
@@ -972,7 +972,7 @@ uint8_t Cpu::EOR(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.A ^= val;
 
 		regs.P.N = regs.A & 0x8000 ? 1 : 0;
@@ -1020,8 +1020,8 @@ uint8_t Cpu::WDM(uint8_t cycles) {
 // TODO double check this
 uint8_t Cpu::MVP(uint8_t cycles) {
 	// Read the source bank and destination bank
-	uint8_t srcBank = memory.read(regs.PC);
-	uint8_t destBank = memory.read(regs.PC + 1);
+	uint8_t srcBank = memory->read(regs.PC);
+	uint8_t destBank = memory->read(regs.PC + 1);
 
 	regs.DBR = destBank;
 
@@ -1030,8 +1030,8 @@ uint8_t Cpu::MVP(uint8_t cycles) {
 	uint32_t destAddr = (destBank << 16) | regs.X;
 
 	// Transfer data from source to destination
-	uint8_t val = memory.read(srcAddr);
-	memory.write(destAddr, val);
+	uint8_t val = memory->read(srcAddr);
+	memory->write(destAddr, val);
 
 	// Increment source and destination addresses
 	regs.X++;
@@ -1087,27 +1087,27 @@ uint8_t Cpu::JMP(uint32_t(Cpu::* f)(), uint8_t cycles) {
 uint8_t Cpu::LSR(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		regs.P.C = val & 0x01;
 		val >>= 1;
 		val &= 0x7F; // Ensure bit 7 is cleared
 
 		regs.P.N = val & 0x80;
 		regs.P.Z = val == 0;
-		memory.write((this->*f)(), val); // Write back the result
+		memory->write((this->*f)(), val); // Write back the result
 	}
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.P.C = val & 0x0001;
 		val >>= 1;
 		val &= 0x7FFF; // Ensure bit 15 is cleared (mask with 0x7FFF)
 
 		regs.P.N = val & 0x8000;
 		regs.P.Z = val == 0;
-		memory.write(addr, val & 0xFF); // Write back the low byte
-		memory.write(addr + 1, val >> 8); // Write back the high byte
+		memory->write(addr, val & 0xFF); // Write back the low byte
+		memory->write(addr + 1, val >> 8); // Write back the high byte
 	}
 
 	return cycles;
@@ -1129,7 +1129,7 @@ uint8_t Cpu::PHA(uint8_t cycles) {
 }
 
 uint8_t Cpu::BVC(uint8_t cycles) {
-	int8_t offset = memory.read(regs.PC++);
+	int8_t offset = memory->read(regs.PC++);
 
 	if (!regs.P.V) {
 		uint16_t oldPC = regs.PC;
@@ -1148,8 +1148,8 @@ uint8_t Cpu::BVC(uint8_t cycles) {
 // TODO double check this
 uint8_t Cpu::MVN(uint8_t cycles) {
 	// Read the source bank and destination bank
-	uint8_t destBank = memory.read(regs.PC);
-	uint8_t srcBank = memory.read(regs.PC + 1);
+	uint8_t destBank = memory->read(regs.PC);
+	uint8_t srcBank = memory->read(regs.PC + 1);
 
 	regs.DBR = destBank;
 
@@ -1158,8 +1158,8 @@ uint8_t Cpu::MVN(uint8_t cycles) {
 	uint32_t destAddr = (destBank << 16) | regs.Y;
 
 	// Transfer data from source to destination
-	uint8_t val = memory.read(srcAddr);
-	memory.write(destAddr, val);
+	uint8_t val = memory->read(srcAddr);
+	memory->write(destAddr, val);
 
 	// Increment source and destination addresses
 	regs.X++;
@@ -1196,7 +1196,7 @@ uint8_t Cpu::RTS(uint8_t cycles) {
 uint8_t Cpu::ADC(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		uint32_t res = 0;
 
 		if (regs.P.D) {
@@ -1218,7 +1218,7 @@ uint8_t Cpu::ADC(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	}
 	else {
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		uint32_t res = 0;
 
 		if (regs.P.D) {
@@ -1277,7 +1277,7 @@ uint8_t Cpu::TDC(uint8_t cycles) {
 }
 
 uint8_t Cpu::PER(uint8_t cycles) {
-	uint16_t relAddr = memory.read(regs.PC++) | memory.read(regs.PC++) << 8;
+	uint16_t relAddr = memory->read(regs.PC++) | memory->read(regs.PC++) << 8;
 	uint16_t effAddr = regs.PC + relAddr;
 
 	push((effAddr >> 8) & 0xFF);
@@ -1288,7 +1288,7 @@ uint8_t Cpu::PER(uint8_t cycles) {
 
 uint8_t Cpu::STZ(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	uint32_t addr = (this->*f)();
-	memory.write(addr, 0); // Always write zero
+	memory->write(addr, 0); // Always write zero
 
 	return cycles;
 }
@@ -1333,7 +1333,7 @@ uint8_t Cpu::ROR(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		regs.P.C = val & 0x01;
 		val = (val >> 1) | (oldC << 7);
 
@@ -1343,7 +1343,7 @@ uint8_t Cpu::ROR(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.P.C = val & 0x0001;
 		val = (val >> 1) | (oldC << 15);
 
@@ -1374,7 +1374,7 @@ uint8_t Cpu::PLA(uint8_t cycles) {
 }
 
 uint8_t Cpu::BVS(uint8_t cycles) {
-	int8_t offset = memory.read(regs.PC++);
+	int8_t offset = memory->read(regs.PC++);
 
 	if (regs.P.V) {
 		uint16_t oldPC = regs.PC;
@@ -1398,7 +1398,7 @@ uint8_t Cpu::SEI(uint8_t cycles) {
 }
 
 uint8_t Cpu::BRA(uint8_t cycles) {
-	int8_t offset = memory.read(regs.PC++);
+	int8_t offset = memory->read(regs.PC++);
 
 	uint16_t oldPC = regs.PC;
 	regs.PC += offset;
@@ -1417,19 +1417,19 @@ uint8_t Cpu::STA(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		memory.write(addr, regs.A & 0x00FF);
+		memory->write(addr, regs.A & 0x00FF);
 	}
 	else {
 		// 16-bit mode
-		memory.write(addr, regs.A & 0x00FF);
-		memory.write(addr + 1, (regs.A >> 8) & 0x00FF);
+		memory->write(addr, regs.A & 0x00FF);
+		memory->write(addr + 1, (regs.A >> 8) & 0x00FF);
 	}
 
 	return cycles;
 }
 
 uint8_t Cpu::BRL(uint8_t cycles) {
-	int16_t offset = memory.read(regs.PC++) | (memory.read(regs.PC++) << 8);
+	int16_t offset = memory->read(regs.PC++) | (memory->read(regs.PC++) << 8);
 
 	regs.PC += offset;
 
@@ -1444,12 +1444,12 @@ uint8_t Cpu::STY(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.X) {
 		// 8-bit mode
-		memory.write(addr, regs.Y & 0x00FF);
+		memory->write(addr, regs.Y & 0x00FF);
 	}
 	else {
 		// 16-bit mode
-		memory.write(addr, regs.Y & 0x00FF);
-		memory.write(addr + 1, (regs.Y >> 8) & 0x00FF);
+		memory->write(addr, regs.Y & 0x00FF);
+		memory->write(addr + 1, (regs.Y >> 8) & 0x00FF);
 	}
 
 	return cycles;
@@ -1460,12 +1460,12 @@ uint8_t Cpu::STX(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.X) {
 		// 8-bit mode
-		memory.write(addr, regs.X & 0x00FF);
+		memory->write(addr, regs.X & 0x00FF);
 	}
 	else {
 		// 16-bit mode
-		memory.write(addr, regs.X & 0x00FF);
-		memory.write(addr + 1, (regs.X >> 8) & 0x00FF);
+		memory->write(addr, regs.X & 0x00FF);
+		memory->write(addr + 1, (regs.X >> 8) & 0x00FF);
 	}
 
 	return cycles;
@@ -1489,7 +1489,7 @@ uint8_t Cpu::DEY(uint8_t cycles) {
 }
 
 uint8_t Cpu::BCC(uint8_t cycles) {
-	int8_t offset = memory.read(regs.PC++);
+	int8_t offset = memory->read(regs.PC++);
 
 	if (!regs.P.C) {
 		uint16_t oldPC = regs.PC;
@@ -1549,7 +1549,7 @@ uint8_t Cpu::TXY(uint8_t cycles) {
 uint8_t Cpu::LDY(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.X) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		regs.Y = (regs.Y & 0xFF00) | val;
 
 		regs.P.N = regs.Y & 0x0080;
@@ -1558,7 +1558,7 @@ uint8_t Cpu::LDY(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.Y = val;
 
 		regs.P.N = regs.Y & 0x8000;
@@ -1570,7 +1570,7 @@ uint8_t Cpu::LDY(uint32_t(Cpu::* f)(), uint8_t cycles) {
 uint8_t Cpu::LDA(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		regs.A = (regs.A & 0xFF00) | val;
 
 		regs.P.N = regs.A & 0x0080;
@@ -1579,7 +1579,7 @@ uint8_t Cpu::LDA(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.A = val;
 
 		regs.P.N = regs.A & 0x8000;
@@ -1591,7 +1591,7 @@ uint8_t Cpu::LDA(uint32_t(Cpu::* f)(), uint8_t cycles) {
 uint8_t Cpu::LDX(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.X) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		regs.X = (regs.X & 0xFF00) | val;
 
 		regs.P.N = regs.X & 0x0080;
@@ -1600,7 +1600,7 @@ uint8_t Cpu::LDX(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		regs.X = val;
 
 		regs.P.N = regs.X & 0x8000;
@@ -1637,7 +1637,7 @@ uint8_t Cpu::PLB(uint8_t cycles) {
 }
 
 uint8_t Cpu::BCS(uint8_t cycles) {
-	int8_t offset = memory.read(regs.PC++);
+	int8_t offset = memory->read(regs.PC++);
 
 	if (regs.P.C) {
 		uint16_t oldPC = regs.PC;
@@ -1697,7 +1697,7 @@ uint8_t Cpu::TYX(uint8_t cycles) {
 uint8_t Cpu::CPY(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.X) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		uint8_t res = regs.Y - val;
 
 		regs.P.N = res & 0x80;
@@ -1707,7 +1707,7 @@ uint8_t Cpu::CPY(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		uint16_t res = regs.Y - val;
 
 		regs.P.N = res & 0x0080;
@@ -1720,7 +1720,7 @@ uint8_t Cpu::CPY(uint32_t(Cpu::* f)(), uint8_t cycles) {
 uint8_t Cpu::CMP(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		uint8_t res = regs.A - val;
 
 		regs.P.N = res & 0x80;
@@ -1730,7 +1730,7 @@ uint8_t Cpu::CMP(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		uint16_t res = regs.A - val;
 
 		regs.P.N = res & 0x0080;
@@ -1743,7 +1743,7 @@ uint8_t Cpu::CMP(uint32_t(Cpu::* f)(), uint8_t cycles) {
 uint8_t Cpu::CPX(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	if (regs.P.X) {
 		// 8-bit mode
-		uint8_t val = memory.read((this->*f)());
+		uint8_t val = memory->read((this->*f)());
 		uint8_t res = regs.X - val;
 
 		regs.P.N = res & 0x80;
@@ -1753,7 +1753,7 @@ uint8_t Cpu::CPX(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		uint16_t res = regs.X - val;
 
 		regs.P.N = res & 0x0080;
@@ -1775,7 +1775,7 @@ uint8_t Cpu::SBC(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read(addr);
+		uint8_t val = memory->read(addr);
 		uint16_t res;
 		if (regs.P.D) {
 			// BCD mode
@@ -1798,7 +1798,7 @@ uint8_t Cpu::SBC(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	}
 	else {
 		// 16-bit mode
-		uint16_t val = memory.read(addr) | (memory.read(addr + 1) << 8);
+		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
 		uint32_t res;
 		if (regs.P.D) {
 			// BCD mode
@@ -1863,7 +1863,7 @@ uint8_t Cpu::PEA(uint32_t(Cpu::*f)(), uint8_t cycles) {
 }
 
 uint8_t Cpu::BEQ(uint8_t cycles) {
-	int8_t offset = memory.read(regs.PC++);
+	int8_t offset = memory->read(regs.PC++);
 
 	if (regs.P.Z) {
 		uint16_t oldPC = regs.PC;
@@ -1913,7 +1913,7 @@ uint8_t Cpu::INX(uint8_t cycles) {
 }
 
 uint8_t Cpu::SEP(uint32_t(Cpu::* f)(), uint8_t cycles) {
-	uint8_t val = memory.read((this->*f)());
+	uint8_t val = memory->read((this->*f)());
 
 	regs.P.C |= val;
 	regs.P.Z |= val;
@@ -1954,7 +1954,7 @@ uint8_t Cpu::CLD(uint8_t cycles) {
 }
 
 uint8_t Cpu::REP(uint32_t(Cpu::* f)(), uint8_t cycles) {
-	uint8_t val = memory.read((this->*f)());
+	uint8_t val = memory->read((this->*f)());
 
 	regs.P.C &= ~val;
 	regs.P.Z &= ~val;
@@ -2002,18 +2002,18 @@ uint8_t Cpu::DEC(uint32_t(Cpu::* f)(), uint8_t cycles) {
 
 	if (regs.P.M) {
 		// 8-bit mode
-		uint8_t val = memory.read(addr);
+		uint8_t val = memory->read(addr);
 		val--;
-		memory.write(addr, val);
+		memory->write(addr, val);
 
 		regs.P.N = val & 0x80;
 		regs.P.Z = val == 0;
 	}
 	else {
 		// 16-bit mode
-		uint16_t val = memory.read(addr) | memory.read(addr + 1) << 8;
+		uint16_t val = memory->read(addr) | memory->read(addr + 1) << 8;
 		val--;
-		memory.write(addr, val);
+		memory->write(addr, val);
 
 		regs.P.N = val & 0x8000;
 		regs.P.Z = val == 0;
@@ -2063,7 +2063,7 @@ uint8_t Cpu::WAI(uint8_t cycles) {
 }
 
 uint8_t Cpu::BNE(uint8_t cycles) {
-	int8_t offset = memory.read(regs.PC++);
+	int8_t offset = memory->read(regs.PC++);
 
 	if (!regs.P.Z) {
 		uint16_t oldPC = regs.PC;
@@ -2080,8 +2080,8 @@ uint8_t Cpu::BNE(uint8_t cycles) {
 }
 
 uint8_t Cpu::PEI(uint8_t cycles) {
-	uint16_t ptrLow = memory.read(regs.PC++);
-	uint16_t ptrHigh = memory.read(regs.PC++);
+	uint16_t ptrLow = memory->read(regs.PC++);
+	uint16_t ptrHigh = memory->read(regs.PC++);
 
 	uint16_t effAddr = ptrLow | (ptrHigh << 8);
 

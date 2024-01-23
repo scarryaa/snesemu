@@ -11,9 +11,9 @@ public:
     Window();
     ~Window();
 
-    bool poll_events();
+    bool pollEvents();
     void render(Emulator* emulator);
-    void post_render(uint8_t* frame_buffer);
+    void postRender(uint8_t* frame_buffer);
 
 private:
     SDL_Window* window;

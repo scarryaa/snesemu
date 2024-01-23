@@ -29,7 +29,7 @@ uint8_t Memory::read(uint32_t address) {
             return dmaPPU2AndHardware[offset - 0x4200];
         } else if (offset >= 0x8000) {
             // LoROM section
-            return loRom[(bank * 0x8000) + (offset - 0x8000)];
+            return cartridge->read(bank * 0x8000) + (offset - 0x8000);
         }
     }
     else if (bank >= 0x80 && bank <= 0xBF) {
@@ -43,7 +43,7 @@ uint8_t Memory::read(uint32_t address) {
         }
         else {
             // LoROM section
-            return loRom[((bank - 0x70) * 0x8000) + (offset - 0x8000)];
+            return cartridge->read((bank - 0x70) * 0x8000) + (offset - 0x8000);
         }
     }
     // TODO other banks and offsets
@@ -69,6 +69,19 @@ void Memory::write(uint32_t address, uint8_t value)
             // PPU1, APU, hardware registers
             ppuAPUAndHardware[offset - 0x2100] = value;
         }
+        else if (offset >= 0x3000 && offset <= 0x3FFF) {
+            // DSP, SuperFX, hardware registers
+            dspSuperFXAndHardware[offset - 0x3000] = value;
+        }
+        else if (offset >= 0x4000 && offset <= 0x40FF) {
+            // old style joypad registers
+            oldJoypad[offset - 0x4000] = value;
+        }
+        else if (offset >= 0x4200 && offset <= 0x44FF)
+        {
+            // DMA, PPU2, hardware registers
+            dmaPPU2AndHardware[offset - 0x4200] = value;
+        }
         // TODO other regions
     }
     else if (bank >= 0x80 && bank <= 0xBF) {
@@ -87,36 +100,4 @@ void Memory::write(uint32_t address, uint8_t value)
 
     // Log invalid writes
     Logger::getInstance()->logError("Invalid address write: " + std::to_string(address));
-}
-
-void Memory::loadRom(std::string path)
-{
-    std::ifstream file;
-    file.open(path, std::ios::ate);
-    size_t fileSize = file.tellg();
-    file.seekg(0);
-    size_t totalBytesRead = 0;
-
-    const size_t BUFFER_SIZE = 4096;
-    std::vector<char> buffer(BUFFER_SIZE);
-
-    while (file.tellg() < fileSize) {
-        file.read(&buffer[0], BUFFER_SIZE);
-        size_t bytesRead = file.gcount();
-
-        for (size_t i = 0; i < bytesRead; ++i) {
-            size_t bank = totalBytesRead / 0x8000;
-            size_t addr = (totalBytesRead % 0x8000) + 0x8000;
-            size_t index = (bank * 0x4000) + (addr - 0x8000);
-
-            if (index < ROM_SIZE) {
-                loRom[index] = buffer[i];
-            }
-            else {
-                throw std::runtime_error("Index exceeds ROM size.");
-            }
-
-            ++totalBytesRead;
-        }
-    }
 }

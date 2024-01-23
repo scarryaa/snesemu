@@ -2,7 +2,7 @@
 
 void Emulator::loadRom(std::string path)
 {
-	memory.loadRom(path);
+	reset_vector = cartridge.getResetVector();
 }
 
 void Emulator::run() {
@@ -20,7 +20,7 @@ void Emulator::run() {
 			elapsed = max_elapsed;
 		}
 		cycles_to_run = (elapsed * Cpu::CLOCK_SPEED / 1000);
-		quit = window.poll_events();
+		quit = window.pollEvents();
 
 		uint8_t cycles = 0;
 		while (cycles_to_run > 0)
@@ -33,9 +33,14 @@ void Emulator::run() {
 			cycles = cpu.step();
 			cycles_to_run -= cycles;
 
-			//ppu.step(cycles * 3);
+			ppu.step(cycles);
 		}
 
-		//window.post_render(ppu.get_frame_buffer());
+		window.postRender(ppu.getFrameBuffer());
 	}
+}
+
+void Emulator::setPCToResetVector()
+{
+	cpu.setPC(reset_vector);
 }
