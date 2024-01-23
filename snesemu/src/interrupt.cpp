@@ -23,8 +23,8 @@ uint8_t Interrupt::handle_interrupt(Interrupts type, Cpu* cpu, Memory* memory) {
         break;
     }
 
-    // Interrupts take ~7 cycles to complete
-    return 7;
+    // Interrupts take ~7 cycles to complete + !E
+    return 7 + !cpu->getFlagE() ? 1 : 0;
 }
 
 void Interrupt::handle_cop(Cpu* cpu, Memory* memory) {
@@ -39,7 +39,7 @@ void Interrupt::handle_cop(Cpu* cpu, Memory* memory) {
     cpu->setI(1);
 
     // Set PC to COP vector (emulated or native)
-    if (cpu->getE()) cpu->setPC(memory->read(Cpu::COP_VECTOR_EMU) | 
+    if (cpu->getFlagE()) cpu->setPC(memory->read(Cpu::COP_VECTOR_EMU) |
         (memory->read(Cpu::COP_VECTOR_EMU + 1) << 8));
     else cpu->setPC(memory->read(Cpu::COP_VECTOR_NATIVE) 
         | (memory->read(Cpu::COP_VECTOR_NATIVE + 1) << 8));
@@ -52,7 +52,7 @@ void Interrupt::handle_brk(Cpu* cpu, Memory* memory) {
     cpu->setI(1);
 
     // Set PC to BRK vector (emulated or native)
-    if (cpu->getE()) cpu->setPC(memory->read(Cpu::BRK_VECTOR_EMU) |
+    if (cpu->getFlagE()) cpu->setPC(memory->read(Cpu::BRK_VECTOR_EMU) |
         (memory->read(Cpu::BRK_VECTOR_EMU + 1) << 8));
     else cpu->setPC(memory->read(Cpu::BRK_VECTOR_NATIVE)
         | (memory->read(Cpu::BRK_VECTOR_NATIVE + 1) << 8));
@@ -64,7 +64,7 @@ void Interrupt::handle_abort(Cpu* cpu, Memory* memory) {
     cpu->push(cpu->getP() & 0xFF);
     cpu->setI(1);
 
-    if (cpu->getE()) {
+    if (cpu->getFlagE()) {
         cpu->setPC(memory->read(Cpu::ABORT_VECTOR_EMU) |
             (memory->read(Cpu::ABORT_VECTOR_EMU + 1) << 8));
     }
@@ -80,7 +80,7 @@ void Interrupt::handle_nmi(Cpu* cpu, Memory* memory) {
     cpu->push(cpu->getP() & 0xFF);
     cpu->setI(1);
 
-    if (cpu->getE()) {
+    if (cpu->getFlagE()) {
         cpu->setPC(memory->read(Cpu::NMI_VECTOR_EMU) |
             (memory->read(Cpu::NMI_VECTOR_EMU + 1) << 8));
     }
@@ -96,7 +96,7 @@ void Interrupt::handle_irq(Cpu* cpu, Memory* memory) {
     cpu->push(cpu->getP() & 0xFF);
     cpu->setI(1);
 
-    if (cpu->getE()) {
+    if (cpu->getFlagE()) {
         cpu->setPC(memory->read(Cpu::IRQ_VECTOR_EMU) |
             (memory->read(Cpu::IRQ_VECTOR_EMU + 1) << 8));
     }

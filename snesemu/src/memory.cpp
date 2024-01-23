@@ -32,9 +32,10 @@ uint8_t Memory::read(uint32_t address) {
             return cartridge->read(bank * 0x8000) + (offset - 0x8000);
         }
     }
-    else if (bank >= 0x80 && bank <= 0xBF) {
-        // Mirror of $00–$3F
-        return read(((bank - 0x80) << 16) | offset);
+    else if (bank <= 0x40 && bank >= 0x6F) {
+        if (address >= 0x8000 && address <= 0xFFFF) {
+            return cartridge->read((bank * 0x8000) + (offset - 0x8000));
+        }
     }
     else if (bank >= 0x70 && bank <= 0x7D) {
         if (offset < 0x8000) {
@@ -43,13 +44,35 @@ uint8_t Memory::read(uint32_t address) {
         }
         else {
             // LoROM section
-            return cartridge->read((bank - 0x70) * 0x8000) + (offset - 0x8000);
+            return cartridge->read((bank * 0x8000) + (offset - 0x8000));
+        }
+    }
+    else if (bank >= 0x7E && bank <= 0x7F) {
+        return wram[(address - 0x7E * 0x10000 + offset)];
+    }
+    else if (bank >= 0x80 && bank <= 0xBF) {
+        // Mirror of $00–$3F
+        return read(((bank - 0x80) << 16) | offset);
+    }
+    else if (bank >= 0xC0 && bank <= 0xEF) {
+        // Mirror of $40-$5F
+        return read((bank - 0x80) << 16 | offset);
+    }
+    else if (bank >= 0xF0 && bank <= 0xFD) {
+        // Mirror of $70-$7D
+        return read((bank - 0x80) << 16 | offset);
+    }
+    else if (bank >= 0xFE && bank <= 0xFF) {
+        if (offset > 0x8000 && offset <= 0xFFFF) {
+            return cartridge->read((bank - 0x80) * 0x8000 + (offset - 0x8000));
         }
     }
     // TODO other banks and offsets
 
     // Default return
-    Logger::getInstance()->logError("Invalid address read: " + std::to_string(address));
+    std::ostringstream oss;
+    oss << "Invalid address read: " << std::hex << std::uppercase << address;
+    Logger::getInstance()->logError(oss.str());
     return 0xFF;
 }
 
@@ -64,23 +87,28 @@ void Memory::write(uint32_t address, uint8_t value)
         if (offset < 0x2000) {
             // LowRAM, shadowed from bank $7E
             wram[offset] = value;
+            return;
         }
         else if (offset >= 0x2100 && offset <= 0x21FF) {
             // PPU1, APU, hardware registers
             ppuAPUAndHardware[offset - 0x2100] = value;
+            return;
         }
         else if (offset >= 0x3000 && offset <= 0x3FFF) {
             // DSP, SuperFX, hardware registers
             dspSuperFXAndHardware[offset - 0x3000] = value;
+            return;
         }
         else if (offset >= 0x4000 && offset <= 0x40FF) {
             // old style joypad registers
             oldJoypad[offset - 0x4000] = value;
+            return;
         }
         else if (offset >= 0x4200 && offset <= 0x44FF)
         {
             // DMA, PPU2, hardware registers
             dmaPPU2AndHardware[offset - 0x4200] = value;
+            return;
         }
         // TODO other regions
     }
@@ -89,15 +117,19 @@ void Memory::write(uint32_t address, uint8_t value)
         uint8_t addr = ((bank - 0x80) << 16) | offset;
         if (!(addr >= 0x00 && addr <= 0x3F)) return;
         write(((bank - 0x80) << 16) | offset, value);
+        return;
     }
     else if (bank >= 0x70 && bank <= 0x7D) {
         if (offset < 0x8000) {
             // Cartridge SRAM
             sram[(bank - 0x70) * 0x8000 + offset] = value;
+            return;
         }
     }
     // TODO other banks and offsets
 
     // Log invalid writes
-    Logger::getInstance()->logError("Invalid address write: " + std::to_string(address));
+    std::ostringstream oss;
+    oss << "Invalid address write: " << std::hex << std::uppercase << address;
+    Logger::getInstance()->logError(oss.str());
 }

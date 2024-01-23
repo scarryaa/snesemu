@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <sstream>
 #include "cartridge.hpp"
 
 class Memory
@@ -38,7 +39,7 @@ private:
     std::vector<uint8_t> dmaPPU2AndHardware;
 
     constexpr static size_t WRAM_SIZE = 0x20000;   // 128KB WRAM
-    constexpr static size_t SRAM_SIZE = 0x8000;    // 32KB SRAM
+    constexpr static size_t SRAM_SIZE = 0x112000;    // 448K SRAM
 };
 
 #endif

@@ -4,12 +4,12 @@
 
 int main(int argv, char** args)
 {
-	Logger::getInstance()->openLog("log.txt");
-
 	Emulator emulator;
-	emulator.loadRom("roms/Super Mario World (U) [!].smc");
+	emulator.openLogFile();
+	emulator.loadRom("roms/CPUADC.sfc");
 	emulator.setPCToResetVector();
 	emulator.run();
 
+	emulator.closeLogFile();
 	return 1;
 }

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <chrono>
+#include <iomanip>
 #include "memory.hpp"
 #include "cpu.hpp"
 #include "window.hpp"
@@ -13,10 +14,15 @@ public:
 	void loadRom(std::string path);
 	void run();
 	void setPCToResetVector();
+	void logState();
+	void openLogFile();
+	void closeLogFile();
 
 	Emulator() : memory(&cartridge), cpu(&memory), paused(false), quit(false) {}
 
 private:
+	std::ofstream logFile;
+
 	Memory memory;
 	Cpu cpu;
 	Window window;

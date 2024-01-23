@@ -36,3 +36,4 @@ x64
 roms
 log.txt
 /snesemu/log.txt
+/snesemu/cpu.log

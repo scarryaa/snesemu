@@ -10,10 +10,11 @@ enum PPU_MODE {
 
 class Ppu {
 public:
-	Ppu() : scanline(0) {}
+	Ppu() : scanline(0), mode(PPU_MODE::VISIBLE) {}
 	void step(int cycles);
 	void drawPixel(int x, int y, uint32_t color);
 	uint8_t* getFrameBuffer();
+	uint8_t vram[0x20000];
 
 private:
 	static const int XRES = 256;

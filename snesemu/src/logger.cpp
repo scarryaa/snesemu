@@ -19,17 +19,17 @@ void Logger::openLog(const std::string& filename)
 
 void Logger::logError(const std::string& message)
 {
-	// write to file if open
-	if (logFile.is_open())
-	{
-		logFile << message << std::endl;
-		logFile.flush();
-	}
-	else
-	{
-		// throw exception
-		throw std::runtime_error("Log file is not open.");
-	}
+	//// write to file if open
+	//if (logFile.is_open())
+	//{
+	//	logFile << message << std::endl;
+	//	logFile.flush();
+	//}
+	//else
+	//{
+	//	// throw exception
+	//	throw std::runtime_error("Log file is not open.");
+	//}
 }
 
 void Logger::closeLog()

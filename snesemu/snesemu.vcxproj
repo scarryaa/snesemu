@@ -40,6 +40,10 @@
     <ClInclude Include="include\rom_type.hpp" />
     <ClInclude Include="include\window.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="cpu.log" />
+    <Text Include="log.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

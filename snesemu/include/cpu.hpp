@@ -47,6 +47,30 @@ public:
 		return status;
 	}
 
+	uint16_t getA() {
+		return regs.A;
+	}
+
+	uint16_t getX() {
+		return regs.X;
+	}
+
+	uint16_t getY() {
+		return regs.Y;
+	}
+
+	uint16_t getSP() {
+		return regs.SP;
+	}
+
+	uint16_t getD() {
+		return regs.D;
+	}
+
+	uint16_t getDBR() {
+		return regs.DBR;
+	}
+
 	static const int CLOCK_SPEED = 3580000;	// 3.58 MHz
 
 	// Interrupt Vectors
@@ -64,39 +88,39 @@ public:
 	static const int COP_VECTOR_EMU = 0xFFF4;
 
 	// Flag getters
-	uint8_t getE() {
+	uint8_t getFlagE() {
 		return E;
 	}
 
-	uint8_t getC() {
+	uint8_t getFlagC() {
 		return regs.P.C;
 	}
 
-	uint8_t getZ() {
+	uint8_t getFlagZ() {
 		return regs.P.Z;
 	}
 
-	uint8_t getI() {
+	uint8_t getFlagI() {
 		return regs.P.I;
 	}
 
-	uint8_t getD() {
+	uint8_t getFlagD() {
 		return regs.P.D;
 	}
 
-	uint8_t getX() {
+	uint8_t getFlagX() {
 		return regs.P.X;
 	}
 
-	uint8_t getM() {
+	uint8_t getFlagM() {
 		return regs.P.M;
 	}
 
-	uint8_t getV() {
+	uint8_t geFlagtV() {
 		return regs.P.V;
 	}
 
-	uint8_t getN() {
+	uint8_t getFlagN() {
 		return regs.P.N;
 	}
 
