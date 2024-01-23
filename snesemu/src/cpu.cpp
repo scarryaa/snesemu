@@ -209,10 +209,10 @@ uint8_t Cpu::step() {
 	case 0x09: return (regs.P.M) ? ORA(&Cpu::getImm_8, 2) : ORA(&Cpu::getImm_16, 3);
 	case 0x0A: return ASL(2);
 	case 0x0B: return PHD(4);
-	case 0x0C: return TSB(getAbs, 6 + mFlagInv_2);
-	case 0x0D: return ORA(getAbs, 4 + mFlagInv);
-	case 0x0E: return ASL(getAbs, 6 + mFlagInv_2);
-	case 0x0F: return ORA(getAbsLong, 5 + mFlagInv);
+	case 0x0C: return TSB(&Cpu::getAbs, 6 + mFlagInv_2);
+	case 0x0D: return ORA(&Cpu::getAbs, 4 + mFlagInv);
+	case 0x0E: return ASL(&Cpu::getAbs, 6 + mFlagInv_2);
+	case 0x0F: return ORA(&Cpu::getAbsLong, 5 + mFlagInv);
 	case 0x10: return BPL(2 + E ? 1 : 0);
 	case 0x11: return ORA(&Cpu::getDirectPageIndirectIndexedY, 5 + mFlagInv + dpL + pbr ? 1 : 0);
 	case 0x12: return ORA(&Cpu::getDirectPageIndirect, 7 + mFlagInv + dpL);
@@ -225,10 +225,10 @@ uint8_t Cpu::step() {
 	case 0x19: return ORA(&Cpu::getAbsIndexedY, 4 + mFlagInv + (pbr ? 1 : 0));
 	case 0x1A: return INC(2);
 	case 0x1B: return TCS(2);
-	case 0x1C: return TRB(getAbs, 6 + mFlagInv_2);
-	case 0x1D: return ORA(getAbsIndexedX, 4 + mFlagInv + pbr);
-	case 0x1E: return ASL(getAbsIndexedX, 7 + mFlagInv_2 + pbr);
-	case 0x1F: return ORA(getAbsLongIndexedX, 5 + mFlagInv);
+	case 0x1C: return TRB(&Cpu::getAbs, 6 + mFlagInv_2);
+	case 0x1D: return ORA(&Cpu::getAbsIndexedX, 4 + mFlagInv + pbr);
+	case 0x1E: return ASL(&Cpu::getAbsIndexedX, 7 + mFlagInv_2 + pbr);
+	case 0x1F: return ORA(&Cpu::getAbsLongIndexedX, 5 + mFlagInv);
 	case 0x20: return JSR(&Cpu::getAbs, 6);
 	case 0x21: return AND(&Cpu::getDirectPageIndirectX, 6 + mFlagInv + dpL);
 	case 0x22: return JSL(&Cpu::getAbsLong, 8);
@@ -241,10 +241,10 @@ uint8_t Cpu::step() {
 	case 0x29: return (regs.P.M) ? AND(&Cpu::getImm_8, 2) : AND(&Cpu::getImm_16, 3);
 	case 0x2A: return ROL(2);
 	case 0x2B: return PLD(5);
-	case 0x2C: return BIT(getAbs, 4 + mFlagInv);
-	case 0x2D: return AND(getAbs, 4 + mFlagInv);
-	case 0x2E: return ROL(getAbs, 6 + mFlagInv);
-	case 0x2F: return AND(getAbsLong, 5 + mFlagInv);
+	case 0x2C: return BIT(&Cpu::getAbs, 4 + mFlagInv);
+	case 0x2D: return AND(&Cpu::getAbs, 4 + mFlagInv);
+	case 0x2E: return ROL(&Cpu::getAbs, 6 + mFlagInv);
+	case 0x2F: return AND(&Cpu::getAbsLong, 5 + mFlagInv);
 	case 0x30: return BMI(2 + E ? 1 : 0);
 	case 0x31: return AND(&Cpu::getDirectPageIndirectIndexedY, 5 + mFlagInv + dpL);
 	case 0x32: return AND(&Cpu::getDirectPageIndirect, 5 + mFlagInv + dpL);
@@ -257,10 +257,10 @@ uint8_t Cpu::step() {
 	case 0x39: return AND(&Cpu::getAbsIndexedY, 4 + mFlagInv + (pbr ? 1 : 0));
 	case 0x3A: return DEC(2);
 	case 0x3B: return TSC(2);
-	case 0x3C: return BIT(getAbsIndexedX, 4 + mFlagInv + pbr);
-	case 0x3D: return AND(getAbsIndexedX, 4 + mFlagInv + pbr);
-	case 0x3E: return ROL(getAbsIndexedX, 7 + mFlagInv + pbr);
-	case 0x3F: return AND(getAbsLongIndexedX, 5 + mFlagInv);
+	case 0x3C: return BIT(&Cpu::getAbsIndexedX, 4 + mFlagInv + pbr);
+	case 0x3D: return AND(&Cpu::getAbsIndexedX, 4 + mFlagInv + pbr);
+	case 0x3E: return ROL(&Cpu::getAbsIndexedX, 7 + mFlagInv + pbr);
+	case 0x3F: return AND(&Cpu::getAbsLongIndexedX, 5 + mFlagInv);
 	case 0x40: return RTI(6 + !E);
 	case 0x41: return EOR(&Cpu::getDirectPageIndirectX, 6 + mFlagInv + dpL);
 	case 0x42: return WDM(2);
@@ -273,10 +273,10 @@ uint8_t Cpu::step() {
 	case 0x49: return (regs.P.M) ? EOR(&Cpu::getImm_8, 2) : EOR(&Cpu::getImm_16, 3);
 	case 0x4A: return LSR(2);
 	case 0x4B: return PHK(3);
-	case 0x4C: return JMP(getAbs, 3);
-	case 0x4D: return EOR(getAbs, 4 + mFlagInv);
-	case 0x4E: return LSR(getAbs, 6 + mFlagInv);
-	case 0x4F: return EOR(getAbsLong, 5 + mFlagInv);
+	case 0x4C: return JMP(&Cpu::getAbs, 3);
+	case 0x4D: return EOR(&Cpu::getAbs, 4 + mFlagInv);
+	case 0x4E: return LSR(&Cpu::getAbs, 6 + mFlagInv);
+	case 0x4F: return EOR(&Cpu::getAbsLong, 5 + mFlagInv);
 	case 0x50: return BVC(2 + E ? 1 : 0);
 	case 0x51: return EOR(&Cpu::getDirectPageIndirectIndexedY, 5 + mFlagInv + dpL + pbr);
 	case 0x52: return EOR(&Cpu::getDirectPageIndirect, 5 + mFlagInv + dpL);
@@ -289,10 +289,10 @@ uint8_t Cpu::step() {
 	case 0x59: return EOR(&Cpu::getAbsIndexedY, 4 + mFlagInv + pbr);
 	case 0x5A: return PHY(3 + xFlagInv);
 	case 0x5B: return TCD(2);
-	case 0x5C: return JML(getAbsLong, 4);
-	case 0x5D: return EOR(getAbsIndexedX, 4 + mFlagInv + pbr);
-	case 0x5E: return LSR(getAbsIndexedX, 7 + mFlagInv + pbr);
-	case 0x5F: return EOR(getAbsLongIndexedX, 5 + mFlagInv);
+	case 0x5C: return JML(&Cpu::getAbsLong, 4);
+	case 0x5D: return EOR(&Cpu::getAbsIndexedX, 4 + mFlagInv + pbr);
+	case 0x5E: return LSR(&Cpu::getAbsIndexedX, 7 + mFlagInv + pbr);
+	case 0x5F: return EOR(&Cpu::getAbsLongIndexedX, 5 + mFlagInv);
 	case 0x60: return RTS(6);
 	case 0x61: return ADC(&Cpu::getDirectPageIndirectX, 6 + mFlagInv + dpL);
 	case 0x62: return PER(6);
@@ -305,10 +305,10 @@ uint8_t Cpu::step() {
 	case 0x69: return (regs.P.M) ? ADC(&Cpu::getImm_8, 2) : ADC(&Cpu::getImm_16, 3);
 	case 0x6A: return ROR(2);
 	case 0x6B: return RTL(6);
-	case 0x6C: return JMP(getAbsIndirect, 5);
-	case 0x6D: return ADC(getAbs, 4 + mFlagInv);
-	case 0x6E: return ROR(getAbs, 6 + mFlagInv);
-	case 0x6F: return ADC(getAbsLong, 5 + mFlagInv);
+	case 0x6C: return JMP(&Cpu::getAbsIndirect, 5);
+	case 0x6D: return ADC(&Cpu::getAbs, 4 + mFlagInv);
+	case 0x6E: return ROR(&Cpu::getAbs, 6 + mFlagInv);
+	case 0x6F: return ADC(&Cpu::getAbsLong, 5 + mFlagInv);
 	case 0x70: return BVS(2 + E ? 1 : 0);
 	case 0x71: return ADC(&Cpu::getDirectPageIndirectIndexedY, 5 + mFlagInv + dpL + pbr);
 	case 0x72: return ADC(&Cpu::getDirectPageIndirect, 5 + mFlagInv + dpL);
@@ -321,10 +321,10 @@ uint8_t Cpu::step() {
 	case 0x79: return ADC(&Cpu::getAbsIndexedY, 4 + mFlagInv + pbr);
 	case 0x7A: return PLY(4 + xFlagInv);
 	case 0x7B: return TDC(2);
-	case 0x7C: return JMP(getAbsIndexedIndirectX, 6);
-	case 0x7D: return ADC(getAbsIndexedX, 4 + mFlagInv + pbr);
-	case 0x7E: return ROR(getAbsIndexedX, 7 + mFlagInv + pbr);
-	case 0x7F: return ADC(getAbsLongIndexedX, 5 + mFlagInv);
+	case 0x7C: return JMP(&Cpu::getAbsIndexedIndirectX, 6);
+	case 0x7D: return ADC(&Cpu::getAbsIndexedX, 4 + mFlagInv + pbr);
+	case 0x7E: return ROR(&Cpu::getAbsIndexedX, 7 + mFlagInv + pbr);
+	case 0x7F: return ADC(&Cpu::getAbsLongIndexedX, 5 + mFlagInv);
 	case 0x80: return BRA(2 + E ? 1 : 0);
 	case 0x81: return STA(&Cpu::getDirectPageIndirectX, 6 + mFlagInv + dpL);
 	case 0x82: return BRL(3);
@@ -337,10 +337,10 @@ uint8_t Cpu::step() {
 	case 0x89: return (regs.P.M) ? BIT(&Cpu::getImm_8, 2) : BIT(&Cpu::getImm_16, 3);
 	case 0x8A: return TXA(3);
 	case 0x8B: return PHB(3);
-	case 0x8C: return STY(getAbs, 4 + xFlagInv);
-	case 0x8D: return STA(getAbs, 4 + mFlagInv);
-	case 0x8E: return STX(getAbs, 4 + xFlagInv);
-	case 0x8F: return STA(getAbsLong, 4 + mFlagInv);
+	case 0x8C: return STY(&Cpu::getAbs, 4 + xFlagInv);
+	case 0x8D: return STA(&Cpu::getAbs, 4 + mFlagInv);
+	case 0x8E: return STX(&Cpu::getAbs, 4 + xFlagInv);
+	case 0x8F: return STA(&Cpu::getAbsLong, 4 + mFlagInv);
 	case 0x90: return BCC(2 + E ? 1 : 0);
 	case 0x91: return STA(&Cpu::getDirectPageIndirectIndexedY, 6 + mFlagInv + dpL);
 	case 0x92: return STA(&Cpu::getDirectPageIndirect, 5 + mFlagInv + dpL);
@@ -423,36 +423,36 @@ uint8_t Cpu::step() {
 	case 0xDF: return CMP(&Cpu::getAbsLongIndexedX, 5 + mFlagInv);
 	case 0xE0: return (regs.P.X) ? CPX(&Cpu::getImm_8, 2) : CPX(&Cpu::getImm_16, 3);
 	case 0xE1: return SBC(&Cpu::getDirectPageIndirectX, 6 + mFlagInv + dpL);
-	case 0xE2: return SEP(getImm_8 ,3);
+	case 0xE2: return SEP(&Cpu::getImm_8 ,3);
 	case 0xE3: return SBC(&Cpu::getStackRelative, 4 + mFlagInv);
 	case 0xE4: return CPX(&Cpu::getDirectPage, 3 + xFlagInv + dpL);
 	case 0xE5: return SBC(&Cpu::getDirectPage, 3 + mFlagInv + dpL);
 	case 0xE6: return INC(&Cpu::getDirectPage, 5 + mFlagInv_2 + dpL);
-	case 0xE7: return SBC(getDirectPageIndirectLong, 6 + mFlagInv + dpL);
+	case 0xE7: return SBC(&Cpu::getDirectPageIndirectLong, 6 + mFlagInv + dpL);
 	case 0xE8: return INX(2);
 	case 0xE9: return (regs.P.M) ? SBC(&Cpu::getImm_8, 2) : SBC(&Cpu::getImm_16, 3);
 	case 0xEA: return NOP(2);
 	case 0xEB: return XBA(3);
-	case 0xEC: return CPX(getAbs, xFlagInv);
-	case 0xED: return SBC(getAbs, mFlagInv);
-	case 0xEE: return INC(getAbs, 6 + mFlagInv_2);
-	case 0xEF: return SBC(getAbsLong, 5 + mFlagInv);
+	case 0xEC: return CPX(&Cpu::getAbs, xFlagInv);
+	case 0xED: return SBC(&Cpu::getAbs, mFlagInv);
+	case 0xEE: return INC(&Cpu::getAbs, 6 + mFlagInv_2);
+	case 0xEF: return SBC(&Cpu::getAbsLong, 5 + mFlagInv);
 	case 0xF0: return BEQ(2 + E ? 1 : 0);
-	case 0xF1: return SBC(getDirectPageIndirectIndexedY, 5 + mFlagInv + dpL + pbr);
-	case 0xF2: return SBC(getDirectPageIndirect, 5 + mFlagInv + dpL);
-	case 0xF3: return SBC(getStackRelativeIndirectIndexedY, 7 + mFlagInv);
-	case 0xF4: return PEA(getAbs, 5);
-	case 0xF5: return SBC(getDirectPageIndirectX, 4 + mFlagInv + dpL);
-	case 0xF6: return INC(getDirectPageIndexedX, 6 + mFlagInv_2 + dpL);
-	case 0xF7: return SBC(getDirectPageIndirectLongIndexedY, 6 + mFlagInv + dpL);
+	case 0xF1: return SBC(&Cpu::getDirectPageIndirectIndexedY, 5 + mFlagInv + dpL + pbr);
+	case 0xF2: return SBC(&Cpu::getDirectPageIndirect, 5 + mFlagInv + dpL);
+	case 0xF3: return SBC(&Cpu::getStackRelativeIndirectIndexedY, 7 + mFlagInv);
+	case 0xF4: return PEA(&Cpu::getAbs, 5);
+	case 0xF5: return SBC(&Cpu::getDirectPageIndirectX, 4 + mFlagInv + dpL);
+	case 0xF6: return INC(&Cpu::getDirectPageIndexedX, 6 + mFlagInv_2 + dpL);
+	case 0xF7: return SBC(&Cpu::getDirectPageIndirectLongIndexedY, 6 + mFlagInv + dpL);
 	case 0xF8: return SED(2);
-	case 0xF9: return SBC(getAbsIndexedY, 4 + mFlagInv + pbr);
+	case 0xF9: return SBC(&Cpu::getAbsIndexedY, 4 + mFlagInv + pbr);
 	case 0xFA: return PLX(4);
 	case 0xFB: return XCE(2);
-	case 0xFC: return JSR(getAbsIndexedIndirectX, 8);
-	case 0xFD: return SBC(getAbsIndexedX, 4 + mFlagInv + pbr);
-	case 0xFE: return INC(getAbsIndexedX, 7 + mFlagInv_2 + pbr);
-	case 0xFF: return SBC(getAbsLongIndexedX, 5 + mFlagInv);
+	case 0xFC: return JSR(&Cpu::getAbsIndexedIndirectX, 8);
+	case 0xFD: return SBC(&Cpu::getAbsIndexedX, 4 + mFlagInv + pbr);
+	case 0xFE: return INC(&Cpu::getAbsIndexedX, 7 + mFlagInv_2 + pbr);
+	case 0xFF: return SBC(&Cpu::getAbsLongIndexedX, 5 + mFlagInv);
 	}
 }
 
@@ -541,6 +541,8 @@ uint8_t Cpu::INC(uint8_t cycles) {
 
 uint8_t Cpu::TCS(uint8_t cycles) {
 	regs.SP = regs.A;
+
+	return cycles;
 }
 
 uint8_t Cpu::INC(uint32_t(Cpu::* f)(), uint8_t cycles) {
@@ -564,6 +566,8 @@ uint8_t Cpu::INC(uint32_t(Cpu::* f)(), uint8_t cycles) {
 		regs.P.N = val & 0x8000;
 		regs.P.Z = val == 0;
 	}
+
+	return cycles;
 }
 
 // only affects accumulator
@@ -814,7 +818,7 @@ uint8_t Cpu::BIT_Imm(uint32_t(Cpu::* f)(), uint8_t cycles) {
 }
 
 // accumulator only
-uint8_t Cpu::ROL(uint32_t(Cpu::* f)(), uint8_t cycles) {
+uint8_t Cpu::ROL(uint8_t cycles) {
 	uint8_t oldC = regs.P.C;
 
 	if (regs.P.M) {
@@ -870,6 +874,8 @@ uint8_t Cpu::ROL(uint32_t(Cpu::* f)(), uint8_t cycles) {
 uint8_t Cpu::PLD(uint8_t cycles) {
 	regs.D = pull();
 	regs.D |= pull() << 8;
+
+	return cycles;
 }
 
 
@@ -964,6 +970,8 @@ uint8_t Cpu::PHY(uint8_t cycles) {
 		push(regs.Y & 0x00FF);
 		push(regs.Y & 0xFF00 >> 8);
 	}
+
+	return cycles;
 }
 
 uint8_t Cpu::TCD(uint8_t cycles) {
@@ -971,11 +979,15 @@ uint8_t Cpu::TCD(uint8_t cycles) {
 
 	regs.P.N = regs.D == 0x8000;
 	regs.P.Z = regs.D == 0;
+
+	return cycles;
 }
 
 uint8_t Cpu::JML(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	uint32_t addr = (this->*f)();
 	regs.PC = addr;
+
+	return cycles;
 }
 
 uint8_t Cpu::WDM(uint8_t cycles) {
@@ -1235,7 +1247,12 @@ uint8_t Cpu::PLY(uint8_t cycles) {
 }
 
 uint8_t Cpu::TDC(uint8_t cycles) {
+	regs.A = regs.D;
 
+	regs.P.N = regs.A == 0x8000;
+	regs.P.Z = regs.A == 0;
+
+	return cycles;
 }
 
 uint8_t Cpu::PER(uint8_t cycles) {
@@ -1256,7 +1273,7 @@ uint8_t Cpu::STZ(uint32_t(Cpu::* f)(), uint8_t cycles) {
 }
 
 // accumulator only
-uint8_t Cpu::ROR(uint32_t(Cpu::* f)(), uint8_t cycles) {
+uint8_t Cpu::ROR(uint8_t cycles) {
 	uint8_t oldC = regs.P.C;
 
 	if (regs.P.M) {
@@ -1820,6 +1837,8 @@ uint8_t Cpu::PEA(uint32_t(Cpu::*f)(), uint8_t cycles) {
 
 	push(addr & 0x00FF);
 	push((addr & 0xFF00 >> 8));
+
+	return cycles;
 }
 
 uint8_t Cpu::BEQ(uint8_t cycles) {
@@ -1851,6 +1870,8 @@ uint8_t Cpu::XBA(uint8_t cycles) {
 
 	regs.P.Z = (regs.A & 0x00FF) == 0;
 	regs.P.N = regs.A & 0x0080;
+
+	return cycles;
 }
 
 uint8_t Cpu::INX(uint8_t cycles) {
@@ -1942,6 +1963,8 @@ uint8_t Cpu::DEC(uint8_t cycles) {
 		regs.P.N = regs.A & 0x8000;
 		regs.P.Z = regs.A == 0;
 	}
+
+	return cycles;
 }
 
 uint8_t Cpu::TSC(uint8_t cycles) {
@@ -1949,6 +1972,8 @@ uint8_t Cpu::TSC(uint8_t cycles) {
 
 	regs.P.N = regs.A & 0x8000;
 	regs.P.Z = regs.A == 0;
+
+	return cycles;
 }
 
 uint8_t Cpu::DEC(uint32_t(Cpu::* f)(), uint8_t cycles) {
@@ -1972,6 +1997,8 @@ uint8_t Cpu::DEC(uint32_t(Cpu::* f)(), uint8_t cycles) {
 		regs.P.N = val & 0x8000;
 		regs.P.Z = val == 0;
 	}
+
+	return cycles;
 }
 
 uint8_t Cpu::INY(uint8_t cycles) {
