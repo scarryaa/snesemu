@@ -2,8 +2,9 @@
 #define INTERRUPT_HPP
 
 #include <stdint.h>
-#include "cpu.hpp"
 #include "memory.hpp"
+
+class Cpu;
 
 enum Interrupts {
 	COP,

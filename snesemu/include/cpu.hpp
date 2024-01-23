@@ -12,6 +12,8 @@ public:
 		regs.SP = INITIAL_STACK_POINTER;
 	}
 
+	uint8_t step();
+
 	// Stack
 	void push(uint8_t value) {
 		memory.write(regs.SP, value);
@@ -44,6 +46,8 @@ public:
 
 		return status;
 	}
+
+	static const int CLOCK_SPEED = 3580000;	// 3.58 MHz
 
 	// Interrupt Vectors
 	static const int IRQ_VECTOR_NATIVE = 0xFFEE;
@@ -186,7 +190,6 @@ private:
 	uint32_t getStackRelativeIndirectIndexedY();
 
 	// Instructions
-	uint8_t step();
 	uint8_t BRK(uint32_t(Cpu::*f)(), uint8_t cycles);
 	uint8_t COP(uint32_t(Cpu::*f)(), uint8_t cycles);
 	uint8_t TSB(uint32_t(Cpu::*f)(), uint8_t cycles);

@@ -1,4 +1,5 @@
 #include "../include/interrupt.hpp"
+#include "../include/cpu.hpp"
 
 uint8_t Interrupt::handle_interrupt(Interrupts type, Cpu* cpu, Memory* memory) {
     switch (type)
