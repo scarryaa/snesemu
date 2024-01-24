@@ -175,6 +175,8 @@ public:
 		regs.P.N = value;
 	}
 
+	void reset();
+
 private:
 	bool B; // Break
 	bool E; // Emulation mode

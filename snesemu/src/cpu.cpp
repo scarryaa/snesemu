@@ -186,6 +186,21 @@ uint32_t Cpu::getStackRelativeIndirectIndexedY()
 	return base + regs.Y;
 }
 
+void Cpu::reset() {
+	interrupt = Interrupts::NONE;
+	regs.SP = INITIAL_STACK_POINTER;
+	regs.P.C = false;
+	regs.P.D = false;
+	regs.P.I = true;
+	regs.P.M = true;
+	regs.P.N = false;
+	regs.P.V = false;
+	regs.P.X = true;
+	regs.P.Z = false;
+	B = true;
+	E = true;
+}
+
 uint8_t Cpu::step() {
 	uint8_t opcode = memory->read(regs.PC++);
 	uint8_t mFlagInv = !regs.P.M ? 1 : 0;

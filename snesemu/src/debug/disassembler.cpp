@@ -1,15 +1,7 @@
 #include "../../include/debug/disassembler.hpp"
+#include "../../include/debug/opcode.hpp"
 
 Disassembler* Disassembler::instance = nullptr;
-
-Disassembler* Disassembler::getInstance()
-{
-	if (instance == nullptr)
-	{
-		instance = new Disassembler();
-	}
-	return instance;
-}
 
 Disassembler::~Disassembler()
 {

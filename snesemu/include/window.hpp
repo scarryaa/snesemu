@@ -19,6 +19,7 @@ public:
     bool pollEvents();
     void render(Emulator* emulator);
     void postRender(uint8_t* frame_buffer);
+    void renderDisassembly(Emulator* emulator);
 
 private:
     SDL_Window* window;

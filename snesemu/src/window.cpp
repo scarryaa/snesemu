@@ -1,5 +1,6 @@
 #include "../include/window.hpp"
 #include "../include/emulator.hpp"
+#include "../include/debug/disassembler.hpp"
 
 Window::Window() {
     // Initialize SDL
@@ -47,10 +48,225 @@ bool Window::pollEvents() {
     return false;
 }
 
+void Window::renderDisassembly(Emulator* emulator)
+{
+    Cpu* cpu = emulator->getCpu(); // Get the CPU from the emulator
+    Disassembler disassembler = emulator->getDisassembler();
+    uint16_t pc = cpu->getPC();     // Get the current PC from the CPU
+    uint16_t startAddress = pc - 10; // Start disassembling a few instructions before the PC for context
+
+    ImGui::Begin("Disassembler");
+
+    // Flags (highlighted if set NVUBDIZC)
+    if (cpu->getFlagC())
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "C");
+    }
+    else
+    {
+        ImGui::Text("C");
+    }
+    ImGui::SameLine();
+
+    if (cpu->getFlagV())
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "D");
+    }
+    else
+    {
+        ImGui::Text("D");
+    }
+    ImGui::SameLine();
+
+    if (cpu->getFlagI())
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "I");
+    }
+    else
+    {
+        ImGui::Text("I");
+    }
+    ImGui::SameLine();
+
+    if (cpu->getFlagM())
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "M");
+    }
+    else
+    {
+        ImGui::Text("M");
+    }
+    ImGui::SameLine();
+
+    if (cpu->getFlagN())
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "N");
+    }
+    else
+    {
+        ImGui::Text("N");
+    }
+    ImGui::SameLine();
+
+    if (cpu->getFlagV())
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "V");
+    }
+    else
+    {
+        ImGui::Text("V");
+    }
+    ImGui::SameLine();
+
+    if (cpu->getFlagX())
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "X");
+    }
+    else
+    {
+        ImGui::Text("X");
+    }
+    ImGui::SameLine();
+
+    if (cpu->getFlagZ())
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Z");
+    }
+    else
+    {
+        ImGui::Text("Z");
+    }
+
+    // Registers
+    // A
+    ImGui::Text("A: %04X", cpu->getA());
+    ImGui::SameLine();
+
+    // X
+    ImGui::Text("X: %04X", cpu->getX());
+    ImGui::SameLine();
+
+    // Y
+    ImGui::Text("Y: %04X", cpu->getY());
+    ImGui::SameLine();
+
+    // SP
+    ImGui::Text("SP: %04X", cpu->getSP());
+
+    // PC
+    ImGui::Text("PC: %04X", cpu->getPC());
+    ImGui::SameLine();
+
+    // P
+    ImGui::Text("P: %02X", cpu->getP());
+
+    // Buttons
+    if (ImGui::Button("Step"))
+    {
+        emulator->step();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Reset"))
+    {
+        emulator->reset();
+    }
+
+    ImGui::SameLine();
+
+    if (emulator->isPaused())
+    {
+        if (ImGui::Button("Resume"))
+        {
+            emulator->unpause();
+        }
+    }
+    else
+    {
+        if (ImGui::Button("Pause"))
+        {
+            emulator->pause();
+        }
+    }
+
+    ImGui::BeginChild("scrolling_region", ImVec2(0, 0), false, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+    ImGui::Columns(6, "disassembler_columns", false);
+    ImGui::SetColumnWidth(0, 15.0f);
+    ImGui::SetColumnWidth(1, 50.0f);
+
+    uint16_t address = startAddress;
+    for (int i = 0; i < 20; i++)
+    {
+        // Check if the address is a breakpoint
+        // if so, draw a red circle
+        if (emulator->isBreakpoint())
+        {
+            ImGui::SetCursorPosX(5.0f);
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "O");
+        }
+        else
+        {
+            ImGui::Text(" ");
+        }
+        ImGui::NextColumn();
+
+        Instruction instruction = disassembler.disassemble(address);
+        if (address == pc)
+        {
+            // Highlight the current PC
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%04X", instruction.address);
+        }
+        else
+        {
+            ImGui::Text("%04X", instruction.address);
+        }
+
+        // Check for double click to set a breakpoint
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+        {
+            // Toggle the breakpoint
+            if (emulator->isBreakpoint())
+            {
+                emulator->clearBreakpoint();
+            }
+            else
+            {
+                emulator->setBreakpoint();
+            }
+        }
+
+        ImGui::NextColumn();
+
+        // Opcode
+        ImGui::Text("%02X", instruction.opcode);
+        ImGui::NextColumn();
+
+        // Op 1
+        ImGui::Text(instruction.bytes[0] == ' ' ? " " : "%02X", instruction.bytes[0]);
+        ImGui::NextColumn();
+
+        // Op 2
+        ImGui::Text(instruction.bytes[1] == ' ' ? " " : "%02X", instruction.bytes[1]);
+        ImGui::NextColumn();
+
+        // Mnemonic
+        ImGui::Text("%s", instruction.mnemonic);
+        ImGui::NextColumn();
+        address += instruction.length;
+    }
+
+    ImGui::EndChild();
+
+    ImGui::End();
+}
+
 void Window::render(Emulator* emulator) {
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame(this->window);
     ImGui::NewFrame();
+
+    this->renderDisassembly(emulator);
 }
 
 void Window::postRender(uint8_t* frameBuffer) {

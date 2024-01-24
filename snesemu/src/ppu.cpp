@@ -28,6 +28,16 @@ void Ppu::step(int cycles) {
 	}
 }
 
+void Ppu::reset() {
+	scanline = 0;
+	mode = PPU_MODE::VISIBLE;
+
+	// zero out framebuffer
+	for (int i = 0; i < XRES * YRES * COLOR_DEPTH; i++) {
+		frameBuffer[i] = 0;
+	}
+}
+
 void Ppu::drawPixel(int x, int y, uint32_t color) {
 	if (x < 0 || x >= XRES || y < 0 || y >= YRES)
 	{
