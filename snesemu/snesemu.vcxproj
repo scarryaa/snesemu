@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\cartridge.cpp" />
     <ClCompile Include="src\cpu.cpp" />
+    <ClCompile Include="src\debug\disassembler.cpp" />
     <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
@@ -39,6 +40,10 @@
   <ItemGroup>
     <ClInclude Include="include\cartridge.hpp" />
     <ClInclude Include="include\cpu.hpp" />
+    <ClInclude Include="include\debug\addressing_mode.hpp" />
+    <ClInclude Include="include\debug\disassembler.hpp" />
+    <ClInclude Include="include\debug\instruction.hpp" />
+    <ClInclude Include="include\debug\opcode.hpp" />
     <ClInclude Include="include\emulator.hpp" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
