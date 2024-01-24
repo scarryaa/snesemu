@@ -8,8 +8,18 @@
 class Cpu
 {
 public:
-	Cpu(Memory* memory) : memory(memory) {
+	Cpu(Memory* memory) : memory(memory), interrupt(Interrupts::NONE) {
 		regs.SP = INITIAL_STACK_POINTER;
+		regs.P.C = false;
+		regs.P.D = false;
+		regs.P.I = true;
+		regs.P.M = true;
+		regs.P.N = false;
+		regs.P.V = false;
+		regs.P.X = true;
+		regs.P.Z = false;
+		B = true;
+		E = true;
 	}
 
 	uint8_t step();
@@ -87,40 +97,48 @@ public:
 	static const int ABORT_VECTOR_EMU = 0xFFF8;
 	static const int COP_VECTOR_EMU = 0xFFF4;
 
+	uint8_t getOpcode() {
+		return memory->read(regs.PC);
+	}
+
 	// Flag getters
-	uint8_t getFlagE() {
+	bool getFlagB() {
+		return B;
+	}
+
+	bool getFlagE() {
 		return E;
 	}
 
-	uint8_t getFlagC() {
+	bool getFlagC() {
 		return regs.P.C;
 	}
 
-	uint8_t getFlagZ() {
+	bool getFlagZ() {
 		return regs.P.Z;
 	}
 
-	uint8_t getFlagI() {
+	bool getFlagI() {
 		return regs.P.I;
 	}
 
-	uint8_t getFlagD() {
+	bool getFlagD() {
 		return regs.P.D;
 	}
 
-	uint8_t getFlagX() {
+	bool getFlagX() {
 		return regs.P.X;
 	}
 
-	uint8_t getFlagM() {
+	bool getFlagM() {
 		return regs.P.M;
 	}
 
-	uint8_t geFlagtV() {
+	bool getFlagV() {
 		return regs.P.V;
 	}
 
-	uint8_t getFlagN() {
+	bool getFlagN() {
 		return regs.P.N;
 	}
 
@@ -158,6 +176,7 @@ public:
 	}
 
 private:
+	bool B; // Break
 	bool E; // Emulation mode
 	static constexpr uint16_t INITIAL_STACK_POINTER = 0x01FF;
 	bool pbr;
@@ -179,14 +198,14 @@ private:
 	      
 		// P flags NVMXDIZC
 		struct {
-			uint8_t C;
-			uint8_t Z;
-			uint8_t I;
-			uint8_t D;
-			uint8_t X;
-			uint8_t M;
-			uint8_t V;
-			uint8_t N;
+			bool C;
+			bool Z;
+			bool I;
+			bool D;
+			bool X;
+			bool M;
+			bool V;
+			bool N;
 		} P;
 	} regs;
 
@@ -231,7 +250,7 @@ private:
 	uint8_t JSR(uint32_t(Cpu::* f)(), uint8_t cycles);
 	uint8_t AND(uint32_t(Cpu::* f)(), uint8_t cycles);
 	uint8_t JSL(uint32_t(Cpu::* f)(), uint8_t cycles);
-	uint8_t BIT(uint32_t(Cpu::* f)(), uint8_t cycles);
+	uint8_t BIT(uint32_t(Cpu::* f)(), uint8_t cycles, bool isImmediate);
 	uint8_t TXA(uint8_t cycles);
 	uint8_t PHB(uint8_t cycles);
 	uint8_t BIT_Imm(uint32_t(Cpu::* f)(), uint8_t cycles);

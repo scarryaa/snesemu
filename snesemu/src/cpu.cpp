@@ -2,30 +2,31 @@
 
 uint32_t Cpu::getImm_8()
 {
-	regs.PC++;
-	return (regs.PBR << 16) | regs.PC;
+	return (regs.PBR << 16) | regs.PC++;
 }
 
 uint32_t Cpu::getImm_16()
 {
 	regs.PC += 2;
-	return (regs.PBR << 16) | regs.PC - 1;
+	return (regs.PBR << 16) | regs.PC - 2;
 }
 
 uint32_t Cpu::getAbs()
 {
+	uint32_t address = (regs.PBR << 16) | regs.PC;
+	uint32_t addr = (memory->read(address + 1) << 8) | memory->read(address);
 	regs.PC += 2;
-	uint32_t addr = ((memory->read((regs.PBR << 16) | 
-		regs.PC) << 8) | memory->read((regs.PBR << 16) | regs.PC - 1));
 	return (regs.DBR << 16) | addr;
 }
 
 uint32_t Cpu::getAbsLong()
 {
+	uint32_t address = (regs.PBR << 16) | regs.PC;
+	uint32_t value = (memory->read(address + 2) << 16) |
+		(memory->read(address + 1) << 8) |
+		memory->read(address);
 	regs.PC += 3;
-	return ((memory->read((regs.PBR << 16) | regs.PC) << 16) | 
-		(memory->read((regs.PBR << 16) | regs.PC - 1) << 8) | 
-		memory->read((regs.PBR << 16) | regs.PC - 2));
+	return value;
 }
 
 uint32_t Cpu::getAbsIndexedX()
@@ -252,7 +253,7 @@ uint8_t Cpu::step() {
 	case 0x21: return AND(&Cpu::getDirectPageIndirectX, 6 + mFlagInv + dpL);
 	case 0x22: return JSL(&Cpu::getAbsLong, 8);
 	case 0x23: return AND(&Cpu::getStackRelative, 4 + mFlagInv);
-	case 0x24: return BIT(&Cpu::getDirectPage, 3 + mFlagInv + dpL);
+	case 0x24: return BIT(&Cpu::getDirectPage, 3 + mFlagInv + dpL, false);
 	case 0x25: return AND(&Cpu::getDirectPage, 3 + mFlagInv + dpL);
 	case 0x26: return ROL(&Cpu::getDirectPage, 5 + mFlagInv + dpL);
 	case 0x27: return AND(&Cpu::getDirectPageIndirectLong, 6 + mFlagInv + dpL);
@@ -260,7 +261,7 @@ uint8_t Cpu::step() {
 	case 0x29: return (regs.P.M) ? AND(&Cpu::getImm_8, 2) : AND(&Cpu::getImm_16, 3);
 	case 0x2A: return ROL(2);
 	case 0x2B: return PLD(5);
-	case 0x2C: return BIT(&Cpu::getAbs, 4 + mFlagInv);
+	case 0x2C: return BIT(&Cpu::getAbs, 4 + mFlagInv, false);
 	case 0x2D: return AND(&Cpu::getAbs, 4 + mFlagInv);
 	case 0x2E: return ROL(&Cpu::getAbs, 6 + mFlagInv);
 	case 0x2F: return AND(&Cpu::getAbsLong, 5 + mFlagInv);
@@ -268,7 +269,7 @@ uint8_t Cpu::step() {
 	case 0x31: return AND(&Cpu::getDirectPageIndirectIndexedY, 5 + mFlagInv + dpL);
 	case 0x32: return AND(&Cpu::getDirectPageIndirect, 5 + mFlagInv + dpL);
 	case 0x33: return AND(&Cpu::getStackRelativeIndirectIndexedY, 7 + mFlagInv);
-	case 0x34: return BIT(&Cpu::getDirectPageIndexedX, 4 + mFlagInv + dpL);
+	case 0x34: return BIT(&Cpu::getDirectPageIndexedX, 4 + mFlagInv + dpL, false);
 	case 0x35: return AND(&Cpu::getDirectPageIndexedX, 4 + mFlagInv + dpL);
 	case 0x36: return ROL(&Cpu::getDirectPageIndexedX, 6 + mFlagInv + dpL);
 	case 0x37: return AND(&Cpu::getDirectPageIndirectLongIndexedY, 6 + mFlagInv + dpL);
@@ -276,7 +277,7 @@ uint8_t Cpu::step() {
 	case 0x39: return AND(&Cpu::getAbsIndexedY, 4 + mFlagInv + (pbr ? 1 : 0));
 	case 0x3A: return DEC(2);
 	case 0x3B: return TSC(2);
-	case 0x3C: return BIT(&Cpu::getAbsIndexedX, 4 + mFlagInv + pbr);
+	case 0x3C: return BIT(&Cpu::getAbsIndexedX, 4 + mFlagInv + pbr, false);
 	case 0x3D: return AND(&Cpu::getAbsIndexedX, 4 + mFlagInv + pbr);
 	case 0x3E: return ROL(&Cpu::getAbsIndexedX, 7 + mFlagInv + pbr);
 	case 0x3F: return AND(&Cpu::getAbsLongIndexedX, 5 + mFlagInv);
@@ -353,7 +354,7 @@ uint8_t Cpu::step() {
 	case 0x86: return STX(&Cpu::getDirectPage, 3 + (xFlagInv) + dpL);
 	case 0x87: return STA(&Cpu::getDirectPageIndirectLong, 6 + mFlagInv + dpL);
 	case 0x88: return DEY(2);
-	case 0x89: return (regs.P.M) ? BIT(&Cpu::getImm_8, 2) : BIT(&Cpu::getImm_16, 3);
+	case 0x89: return (regs.P.M) ? BIT(&Cpu::getImm_8, 2, true) : BIT(&Cpu::getImm_16, 3, true);
 	case 0x8A: return TXA(3);
 	case 0x8B: return PHB(3);
 	case 0x8C: return STY(&Cpu::getAbs, 4 + xFlagInv);
@@ -479,8 +480,9 @@ uint8_t Cpu::step() {
 
 uint8_t Cpu::BRK(uint32_t(Cpu::*f)(), uint8_t cycles) {
 	// set BRK interrupt
-	regs.P.I = 1;
-	regs.P.D = 0;
+	B = true;
+	regs.P.I = true;
+	regs.P.D = false;
 	interrupt = Interrupts::BRK;
 	// the rest is handled in the interrupt handling method
 
@@ -769,25 +771,27 @@ uint8_t Cpu::JSL(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	return cycles;
 }
 
-uint8_t Cpu::BIT(uint32_t(Cpu::* f)(), uint8_t cycles) {
+uint8_t Cpu::BIT(uint32_t(Cpu::* f)(), uint8_t cycles, bool isImmediate) {
 	if (regs.P.M) {
 		// 8-bit mode
 		uint8_t val = memory->read((this->*f)());
-		uint8_t res = regs.A & val;
 
-		regs.P.N = val & 0x80;
-		regs.P.V = val & 0x40;
-		regs.P.Z = res == 0;
+		if (!isImmediate) {
+			regs.P.N = val >> 7;
+			regs.P.V = ((val >> 6) & 1);
+		}
+		regs.P.Z = (val & regs.A) == 0;
 	}
 	else {
 		// 16-bit mode
 		uint32_t addr = (this->*f)();
 		uint16_t val = memory->read(addr) | (memory->read(addr + 1) << 8);
-		uint16_t res = regs.A & val;
 
-		regs.P.N = val & 0x8000;
-		regs.P.V = val & 0x4000;
-		regs.P.Z = res == 0;
+		if (!isImmediate) {
+			regs.P.N = val >> 15;
+			regs.P.V = ((val >> 14) & 1);
+		}
+		regs.P.Z = (val & regs.A) == 0;
 	}
 
 	return cycles;
@@ -1847,8 +1851,8 @@ uint8_t Cpu::PLX(uint8_t cycles) {
 uint8_t Cpu::XCE(uint8_t cycles) {
 	// swap C and E flags
 	uint8_t tmp = regs.P.C;
-	regs.P.C = regs.P.X;
-	regs.P.X = tmp;
+	regs.P.C = E;
+	E = tmp;
 
 	return cycles;
 }
@@ -1915,14 +1919,33 @@ uint8_t Cpu::INX(uint8_t cycles) {
 uint8_t Cpu::SEP(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	uint8_t val = memory->read((this->*f)());
 
-	regs.P.C |= val;
-	regs.P.Z |= val;
-	regs.P.I |= val;
-	regs.P.D |= val;
-	regs.P.X |= val;
-	regs.P.M |= val;
-	regs.P.V |= val;
-	regs.P.N |= val;
+	uint8_t N = (regs.P.N | ((val >> 7) & 1)) > 0;
+	uint8_t V = (regs.P.V | ((val >> 6) & 1)) > 0;
+	uint8_t M = (regs.P.M | ((val >> 5) & 1)) > 0;
+	uint8_t X = (regs.P.X | ((val >> 4) & 1)) > 0;
+	uint8_t boolB = (B | ((val >> 4) & 1)) > 0;
+	uint8_t D = (regs.P.D | ((val >> 3) & 1)) > 0;
+	uint8_t I = (regs.P.I | ((val >> 2) & 1)) > 0;
+	uint8_t Z = (regs.P.Z | ((val >> 1) & 1)) > 0;
+	uint8_t C = (regs.P.C | (val & 1)) > 0;
+
+	regs.P.N = N;
+	regs.P.V = V;
+
+	if (!E) {
+		regs.P.M = M;
+		regs.P.X = X;
+	}
+	else {
+		B = boolB;
+		regs.P.M = true;
+		regs.P.X = true;
+	}
+
+	regs.P.D = D;
+	regs.P.I = I;
+	regs.P.Z = Z;
+	regs.P.C = C;
 
 	return cycles;
 }
@@ -1956,14 +1979,33 @@ uint8_t Cpu::CLD(uint8_t cycles) {
 uint8_t Cpu::REP(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	uint8_t val = memory->read((this->*f)());
 
-	regs.P.C &= ~val;
-	regs.P.Z &= ~val;
-	regs.P.I &= ~val;
-	regs.P.D &= ~val;
-	regs.P.X &= ~val;
-	regs.P.M &= ~val;
-	regs.P.V &= ~val;
-	regs.P.N &= ~val;
+	bool N = ((uint8_t)regs.P.N & ~((val >> 7) & 1)) > 0;
+	bool V = ((uint8_t)regs.P.V & ~((val >> 6) & 1)) > 0;
+	bool M = ((uint8_t)regs.P.M & ~((val >> 5) & 1)) > 0;
+	bool X = ((uint8_t)regs.P.X & ~((val >> 4) & 1)) > 0;
+	bool boolB = ((uint8_t)B & ~((val >> 4) & 1)) > 0;
+	bool D = ((uint8_t)regs.P.D & ~((val >> 3) & 1)) > 0;
+	bool I = ((uint8_t)regs.P.I & ~((val >> 2) & 1)) > 0;
+	bool Z = ((uint8_t)regs.P.Z & ~((val >> 1) & 1)) > 0;
+	bool C = ((uint8_t)regs.P.C & ~(val & 1)) > 0;
+
+	regs.P.N = N;
+	regs.P.V = V;
+	
+	if (!E) {
+		regs.P.M = M;
+		regs.P.X = X;
+	}
+	else {
+		B = boolB;
+		regs.P.M = true;
+		regs.P.X = true;
+	}
+
+	regs.P.D = D;
+	regs.P.I = I;
+	regs.P.Z = Z;
+	regs.P.C = C;
 
 	return cycles;
 }

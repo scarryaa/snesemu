@@ -29,12 +29,12 @@ uint8_t Memory::read(uint32_t address) {
             return dmaPPU2AndHardware[offset - 0x4200];
         } else if (offset >= 0x8000) {
             // LoROM section
-            return cartridge->read(bank * 0x8000) + (offset - 0x8000);
+            return cartridge->read((bank << 16) | offset);
         }
     }
     else if (bank <= 0x40 && bank >= 0x6F) {
         if (address >= 0x8000 && address <= 0xFFFF) {
-            return cartridge->read((bank * 0x8000) + (offset - 0x8000));
+            return cartridge->read((bank << 16) | offset);
         }
     }
     else if (bank >= 0x70 && bank <= 0x7D) {
@@ -64,7 +64,7 @@ uint8_t Memory::read(uint32_t address) {
     }
     else if (bank >= 0xFE && bank <= 0xFF) {
         if (offset > 0x8000 && offset <= 0xFFFF) {
-            return cartridge->read((bank - 0x80) * 0x8000 + (offset - 0x8000));
+            return cartridge->read((bank << 16) | offset);
         }
     }
     // TODO other banks and offsets

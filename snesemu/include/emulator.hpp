@@ -31,7 +31,7 @@ private:
 	
 	bool paused;
 	bool quit;
-	uint16_t reset_vector;
+	uint16_t resetVector;
 };
 
 #endif

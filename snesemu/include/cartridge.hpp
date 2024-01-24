@@ -17,8 +17,9 @@ public:
 	uint32_t getResetVector();
 private:
 	const int LOROM_HEADER = 0x7FC0;
-	constexpr static size_t ROM_SIZE = 0x400000;   // 4MB ROM
+	constexpr static size_t ROM_SIZE = 0xFFFFFF;   // 4MB ROM
 
+	uint16_t resetVector;
 	std::vector<uint8_t> loRom;
 	ROM_TYPE romType = ROM_TYPE::Unknown;
 };

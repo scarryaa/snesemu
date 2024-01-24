@@ -3,7 +3,7 @@
 void Emulator::loadRom(std::string path)
 {
 	cartridge.loadRom(path);
-	reset_vector = cartridge.getResetVector();
+	resetVector = cartridge.getResetVector();
 }
 
 void Emulator::run() {
@@ -52,16 +52,28 @@ void Emulator::closeLogFile() {
 
 void Emulator::setPCToResetVector()
 {
-	cpu.setPC(reset_vector);
+	cpu.setPC(resetVector);
 }
 
 void Emulator::logState() {
 	char buffer[256];
 
 	snprintf(buffer, sizeof(buffer),
-		"%06X A:%04X X:%04X Y:%04X SP:%04X D:%04X DB:%02X %02X",
-		cpu.getPC(), cpu.getA(), cpu.getX(), cpu.getY(),
-		cpu.getSP(), cpu.getD(), cpu.getDBR(), cpu.getP());
+		"%06x OP:%02x A:%04x X:%04x Y:%04x S:%04x D:%04x DB:%02x %s%s%s%s%s%s%s%s",
+		cpu.getPC(), cpu.getOpcode(), cpu.getA(), cpu.getX(), cpu.getY(),
+		cpu.getSP(), cpu.getD(), cpu.getDBR(),
+		cpu.getFlagN() ? "N" : "n",
+		cpu.getFlagV() ? "V" : "v",
+		cpu.getFlagE() ?
+			"1" :
+			cpu.getFlagM() ? "M" : "m",
+		cpu.getFlagE() ? 
+			cpu.getFlagB() ? "B" : "b" :
+			cpu.getFlagX() ? "X" : "x",
+		cpu.getFlagD() ? "D" : "d",
+		cpu.getFlagI() ? "I" : "i",
+		cpu.getFlagZ() ? "Z" : "z",
+		cpu.getFlagC() ? "C" : "c");
 
 	logFile << buffer << std::endl;
 	logFile.flush();
