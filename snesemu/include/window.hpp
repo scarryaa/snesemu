@@ -2,6 +2,11 @@
 #define WINDOW_HPP
 
 #include <SDL.h>
+#include "../include/imgui/imgui.h"
+#include "../include/imgui/imconfig.h"
+#include "../include/imgui/imgui_internal.h"
+#include "../include/imgui/imgui_impl_sdl2.h"
+#include "../include/imgui/imgui_impl_sdlrenderer2.h"
 
 class Emulator;
 

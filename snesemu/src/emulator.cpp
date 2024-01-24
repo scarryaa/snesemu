@@ -23,6 +23,8 @@ void Emulator::run() {
 		cycles_to_run = (elapsed * Cpu::CLOCK_SPEED / 1000);
 		quit = window.pollEvents();
 
+		window.render(this);
+
 		uint8_t cycles = 0;
 		while (cycles_to_run > 0)
 		{
