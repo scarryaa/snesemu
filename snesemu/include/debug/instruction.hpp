@@ -10,7 +10,7 @@ typedef struct {
     uint8_t opcode;
     uint16_t operand1;
     uint16_t operand2;
-    uint8_t bytes;
+    uint8_t bytes[3];
     uint16_t length;
     const char* mnemonic;
     AddressingMode addressingMode;

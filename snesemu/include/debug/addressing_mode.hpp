@@ -16,7 +16,6 @@ enum AddressingMode
     kAbsoluteIndirect,
     kAbsoluteIndirectLong,
     kAbsoluteIndexedIndirectX,
-    kLong,
     kDirectPage,
     kDirectPageIndexedX,
     kDirectPageIndexedY,

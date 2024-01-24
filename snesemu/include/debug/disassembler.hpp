@@ -9,7 +9,7 @@
 class Disassembler {
 public:
 	static Disassembler* getInstance();
-	void disassemble(uint32_t address);
+	Instruction disassemble(uint32_t address);
 
 	Disassembler(Disassembler const&) = delete;
 	void operator=(Disassembler const&) = delete;
@@ -20,7 +20,7 @@ private:
 	Memory* memory;
 	Cpu* cpu;
 
-	Disassembler() {}
+	Disassembler() : cpu(cpu), memory(memory) {}
 };
 
 #endif
