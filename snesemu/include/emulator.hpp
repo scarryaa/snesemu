@@ -23,6 +23,10 @@ public:
 		return disassembler;
 	}
 
+	Memory* getMemory() {
+		return &memory;
+	}
+
 	Cpu* getCpu() {
 		return &cpu;
 	}
@@ -62,7 +66,11 @@ public:
 		ppu.reset();
 	}
 
-	Emulator() : memory(&cartridge), cpu(&memory), disassembler(&cpu, &memory), paused(false), quit(false) {}
+	Emulator() : memory(&cartridge), cpu(&memory), disassembler(&cpu, &memory), paused(false), quit(false) {
+		ppu.setCpu(cpu);
+		memory.setCpu(cpu);
+		memory.setPpu(ppu);
+	}
 
 private:
 	std::ofstream logFile;

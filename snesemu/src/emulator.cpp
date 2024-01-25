@@ -45,6 +45,8 @@ void Emulator::run() {
 }
 
 void Emulator::openLogFile() {
+	logFile.open("cpu.log", std::ios_base::out | std::ios_base::trunc);
+	logFile.close();
 	logFile.open("cpu.log", std::ios_base::app);
 }
 

@@ -97,6 +97,14 @@ public:
 	static const int ABORT_VECTOR_EMU = 0xFFF8;
 	static const int COP_VECTOR_EMU = 0xFFF4;
 
+	bool isInterruptSet(Interrupts interruptType) {
+		return interrupt == interruptType;
+	}
+
+	void setInterrupt(Interrupts interruptType) {
+		interrupt = interruptType;
+	}
+
 	uint8_t getOpcode() {
 		return memory->read(regs.PC);
 	}

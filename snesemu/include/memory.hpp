@@ -9,6 +9,10 @@
 #include <sstream>
 #include "cartridge.hpp"
 
+// TODO refactor this?
+class Cpu;
+class Ppu;
+
 class Memory
 {
 public:
@@ -23,11 +27,22 @@ public:
         oldJoypad(0x100),
         dmaPPU2AndHardware(0x300) {}
 
+    void setCpu(Cpu& cpu) {
+        this->cpu = &cpu;
+    }
+
+    void setPpu(Ppu& ppu) {
+        this->ppu = &ppu;
+    }
+
     uint8_t read(uint32_t address);
     void write(uint32_t address, uint8_t value);
 
 private:
     Cartridge *cartridge;
+    Cpu* cpu;
+    Ppu* ppu;
+
     std::vector<uint8_t> wram;
     std::vector<uint8_t> sram;
 

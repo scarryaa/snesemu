@@ -37,3 +37,4 @@ roms
 log.txt
 /snesemu/log.txt
 /snesemu/cpu.log
+/snesemu/imgui.ini

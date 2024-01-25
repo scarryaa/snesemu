@@ -57,7 +57,7 @@ void Window::renderDisassembly(Emulator* emulator)
 
     ImGui::Begin("Disassembler");
 
-    // Flags (highlighted if set NVUBDIZC)
+    // Flags (highlighted if set)
     if (cpu->getFlagC())
     {
         ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "C");
@@ -193,7 +193,7 @@ void Window::renderDisassembly(Emulator* emulator)
     ImGui::BeginChild("scrolling_region", ImVec2(0, 0), false, ImGuiWindowFlags_AlwaysVerticalScrollbar);
     ImGui::Columns(6, "disassembler_columns", false);
     ImGui::SetColumnWidth(0, 15.0f);
-    ImGui::SetColumnWidth(1, 50.0f);
+    ImGui::SetColumnWidth(1, 60.0f);
 
     uint16_t address = startAddress;
     for (int i = 0; i < 20; i++)
@@ -215,11 +215,11 @@ void Window::renderDisassembly(Emulator* emulator)
         if (address == pc)
         {
             // Highlight the current PC
-            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%04X", instruction.address);
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%06X", instruction.address);
         }
         else
         {
-            ImGui::Text("%04X", instruction.address);
+            ImGui::Text("%06X", instruction.address);
         }
 
         // Check for double click to set a breakpoint
@@ -261,12 +261,39 @@ void Window::renderDisassembly(Emulator* emulator)
     ImGui::End();
 }
 
+void Window::renderCpuMemoryView(Emulator* emulator)
+{
+    Memory* memory = emulator->getMemory();
+
+    ImGui::Begin("CPU Memory View");
+
+    const int bytesPerRow = 16;
+    const int totalLines = 0x10000 / bytesPerRow;
+
+    ImGui::BeginChild("MemoryScrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+
+    for (int line = 0; line < totalLines; ++line)
+    {
+        uint16_t addr = line * bytesPerRow;
+        ImGui::Text("%04X: ", addr);
+        for (int col = 0; col < bytesPerRow; ++col)
+        {
+            ImGui::SameLine();
+            ImGui::Text("%02X ", memory->read(addr + col));
+        }
+    }
+
+    ImGui::EndChild();
+    ImGui::End();
+}
+
 void Window::render(Emulator* emulator) {
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame(this->window);
     ImGui::NewFrame();
 
     this->renderDisassembly(emulator);
+    this->renderCpuMemoryView(emulator);
 }
 
 void Window::postRender(uint8_t* frameBuffer) {

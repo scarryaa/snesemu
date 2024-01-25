@@ -1,30 +1,85 @@
 #include "../include/ppu.hpp"
+#include "../include/cpu.hpp"
 
 void Ppu::step(int cycles) {
 	scanline++;
 
-	if (scanline >= VISIBLE_SCANLINES) {
+	if (scanline == 225) {
 		// enter vblank
-		scanline -= VISIBLE_SCANLINES;
+		// set NMI
+		cpu->setInterrupt(Interrupts::NMI);
 		mode = PPU_MODE::VBLANK;
 	}
-	else {
-		// enter regular mode
+	else if (scanline >= TOTAL_SCANLINES) {
+		scanline -= TOTAL_SCANLINES;
+		cpu->setInterrupt(Interrupts::NONE);
 		mode = PPU_MODE::VISIBLE;
 	}
 
 	switch (mode) {
 	case VBLANK:
 	{
-		for (int x = 0; x < XRES; x++) {
-			for (int y = 0; y < YRES; y++) {
-				drawPixel(x, y, 0xFFFFFF);
-			}
-		}
 		break;
 	}
 	case VISIBLE:
+
 		break;
+	}
+}
+
+uint8_t Ppu::read(uint32_t address) {
+	switch (address) {
+		// 0x2100 - Screen brightness and on/off
+	case 0x2100:
+		return screenBrightnessAndOnOff;
+
+		// Size of sprites and base addr for sprite tiles
+	case 0x2101:
+		return spriteSizeAndBaseSpriteAddr;
+
+		// Set VRAM addr of sprite data
+	case 0x2102:
+		return vramAddrForSpriteData;
+
+	case 0x2103:
+		break;
+
+		// Sets video mode and size of bg tiles
+	case 0x2105:
+		return videoModeAndTileSize;
+
+	default:
+		return 0xFF;
+	}
+}
+
+void Ppu::write(uint32_t address, uint8_t value) {
+	switch (address) {
+		// 0x2100 - Screen brightness and on/off
+	case 0x2100:
+		screenBrightnessAndOnOff = value;
+		break;
+
+		// Size of sprites and base addr for sprite tiles
+	case 0x2101:
+		spriteSizeAndBaseSpriteAddr = value;
+		break;
+
+		// Set VRAM addr of sprite data
+	case 0x2102:
+		vramAddrForSpriteData = value;
+		break;
+
+	case 0x2103:
+		break;
+
+		// Sets video mode and size of bg tiles
+	case 0x2105:
+		videoModeAndTileSize = value;
+		break;
+
+	default:
+		return;
 	}
 }
 

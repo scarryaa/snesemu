@@ -1,5 +1,7 @@
 #include "../include/memory.hpp"
 #include "../include/logger.hpp"
+#include "../include/cpu.hpp"
+#include "../include/ppu.hpp"
 
 uint8_t Memory::read(uint32_t address) {
     // Mask the address to get bank and offset within the bank
@@ -13,8 +15,7 @@ uint8_t Memory::read(uint32_t address) {
             return wram[offset];
         }
         else if (offset >= 0x2100 && offset <= 0x21FF) {
-            // PPU1, APU, hardware registers
-            return ppuAPUAndHardware[offset - 0x2100];
+            ppu->read((bank << 16) | offset);
         }
         else if (offset >= 0x3000 && offset <= 0x3FFF) {
             // DSP, SuperFX, hardware registers
@@ -22,9 +23,17 @@ uint8_t Memory::read(uint32_t address) {
         }
         else if (offset >= 0x4000 && offset <= 0x40FF) {
             // old style joypad registers
+
             return oldJoypad[offset - 0x4000];
         } else if (offset >= 0x4200 && offset <= 0x44FF)
         {
+            if (offset == 0x4210) {
+                bool isNMI = cpu->isInterruptSet(Interrupts::NMI);
+                cpu->setInterrupt(Interrupts::NONE);
+                uint8_t val = (isNMI ? 0b10000000 : 0b00000000) | 0x02;
+                return val;
+            }
+
             // DMA, PPU2, hardware registers
             return dmaPPU2AndHardware[offset - 0x4200];
         } else if (offset >= 0x8000) {

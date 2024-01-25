@@ -199,6 +199,13 @@ void Cpu::reset() {
 	regs.P.Z = false;
 	B = true;
 	E = true;
+
+	regs.A = 0;
+	regs.D = 0;
+	regs.DBR = 0;
+	regs.PBR = 0;
+	regs.X = 0;
+	regs.Y = 0;
 }
 
 uint8_t Cpu::step() {
@@ -211,7 +218,7 @@ uint8_t Cpu::step() {
 	uint8_t irq_cycles = 0;
 
 	// Check for interrupts
-	if (interrupt != Interrupts::NONE)
+	if (interrupt != Interrupts::NONE && regs.P.I != 1)
 	{
 		irq_cycles = Interrupt::handle_interrupt(interrupt, this, memory);
 		this->interrupt = Interrupts::NONE;
@@ -790,12 +797,13 @@ uint8_t Cpu::BIT(uint32_t(Cpu::* f)(), uint8_t cycles, bool isImmediate) {
 	if (regs.P.M) {
 		// 8-bit mode
 		uint8_t val = memory->read((this->*f)());
+		printf("BIT %04X ", val);
 
 		if (!isImmediate) {
-			regs.P.N = val >> 7;
+			regs.P.N = (val >> 7);
 			regs.P.V = ((val >> 6) & 1);
 		}
-		regs.P.Z = (val & regs.A) == 0;
+		regs.P.Z = (val & (regs.A & 0x00FF)) == 0;
 	}
 	else {
 		// 16-bit mode
