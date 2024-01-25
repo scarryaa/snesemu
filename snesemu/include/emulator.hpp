@@ -4,11 +4,13 @@
 #include <string>
 #include <chrono>
 #include <iomanip>
+#include <set>
 #include "memory.hpp"
 #include "cpu.hpp"
 #include "window.hpp"
 #include "ppu.hpp"
 #include "debug/disassembler.hpp"
+#include "debug/breakpoint.hpp"
 
 class Emulator {
 public:
@@ -31,17 +33,30 @@ public:
 		return &cpu;
 	}
 
-	bool isBreakpoint() {
+	bool isBreakpoint(breakpoint_type_t type, long value) {
+		for (auto breakpoint : breakpoints)
+		{
+			if (breakpoint.type == type && breakpoint.address == value)
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 
-	void clearBreakpoint() {
-
+	std::set<Breakpoint> getBreakpoints() {
+		return breakpoints;
 	}
 
-	void setBreakpoint() {
-
+	void clearBreakpoint(breakpoint_type_t type, uint16_t value) {
+		breakpoints.erase({ type, value });
 	}
+
+	void setBreakpoint(breakpoint_type_t type, uint16_t value) {
+		breakpoints.insert({ type, value });
+	}
+
+	void checkForBreakpoints();
 
 	void pause() {
 		paused = true;
@@ -85,6 +100,7 @@ private:
 	bool paused;
 	bool quit;
 	uint16_t resetVector;
+	std::set<Breakpoint> breakpoints;
 };
 
 #endif

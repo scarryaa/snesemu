@@ -22,6 +22,8 @@ public:
 	uint8_t read(uint32_t address);
 	void write(uint32_t address, uint8_t value);
 
+	void drawBackground();
+
 	void reset();
 	void step(int cycles);
 	void drawPixel(int x, int y, uint32_t color);
@@ -42,6 +44,25 @@ private:
 	uint8_t spriteSizeAndBaseSpriteAddr;
 	uint8_t vramAddrForSpriteData;
 	uint8_t videoModeAndTileSize;
+	uint8_t bgMosiac;
+	uint8_t bgTilemapAddrAndSize1;
+	uint8_t bgTilemapAddrAndSize2;
+	uint8_t bgTilemapAddrAndSize3;
+	uint8_t bgTilemapAddrAndSize4;
+	uint8_t bgCharacterAddr1;
+	uint8_t bgCharacterAddr2;
+	uint8_t bgScroll1;
+	uint8_t bgScroll2;
+	uint8_t bgScroll3;
+	uint8_t bgScroll4;
+	uint8_t bgScroll5;
+	uint8_t bgScroll6;
+	uint8_t bgScroll7;
+	uint8_t bgScroll8;
+	uint8_t vramAddrIncrementMode;
+	uint8_t vramAddr1;
+	uint8_t vramAddr2;
+	uint8_t ppuMode;
 
 	PPU_MODE mode;
 	int scanline;

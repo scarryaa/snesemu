@@ -38,9 +38,19 @@ void Emulator::run() {
 			cycles_to_run -= cycles;
 
 			ppu.step(cycles);
+
+			checkForBreakpoints();
 		}
 
 		window.postRender(ppu.getFrameBuffer());
+	}
+}
+
+void Emulator::checkForBreakpoints()
+{
+	if (isBreakpoint(BREAKPOINT_TYPE_ADDRESS, cpu.getPC()))
+	{
+		pause();
 	}
 }
 

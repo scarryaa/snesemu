@@ -41,6 +41,7 @@
     <ClInclude Include="include\cartridge.hpp" />
     <ClInclude Include="include\cpu.hpp" />
     <ClInclude Include="include\debug\addressing_mode.hpp" />
+    <ClInclude Include="include\debug\breakpoint.hpp" />
     <ClInclude Include="include\debug\disassembler.hpp" />
     <ClInclude Include="include\debug\instruction.hpp" />
     <ClInclude Include="include\debug\opcode.hpp" />

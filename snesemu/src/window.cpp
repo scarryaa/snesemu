@@ -200,7 +200,7 @@ void Window::renderDisassembly(Emulator* emulator)
     {
         // Check if the address is a breakpoint
         // if so, draw a red circle
-        if (emulator->isBreakpoint())
+        if (emulator->isBreakpoint(BREAKPOINT_TYPE_ADDRESS, address))
         {
             ImGui::SetCursorPosX(5.0f);
             ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "O");
@@ -226,13 +226,13 @@ void Window::renderDisassembly(Emulator* emulator)
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
         {
             // Toggle the breakpoint
-            if (emulator->isBreakpoint())
+            if (emulator->isBreakpoint(BREAKPOINT_TYPE_ADDRESS, address))
             {
-                emulator->clearBreakpoint();
+                emulator->clearBreakpoint(BREAKPOINT_TYPE_ADDRESS, address);
             }
             else
             {
-                emulator->setBreakpoint();
+                emulator->setBreakpoint(BREAKPOINT_TYPE_ADDRESS, address);
             }
         }
 
