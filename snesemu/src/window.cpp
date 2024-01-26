@@ -252,7 +252,7 @@ void Window::renderDisassembly(Emulator* emulator)
         // Mnemonic
         ImGui::Text("%s", instruction.mnemonic);
         ImGui::NextColumn();
-        address += instruction.length;
+        address += 1;
     }
 
     ImGui::EndChild();

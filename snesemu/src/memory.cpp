@@ -100,7 +100,7 @@ void Memory::write(uint32_t address, uint8_t value)
         }
         else if (offset >= 0x2100 && offset <= 0x21FF) {
             // PPU1, APU, hardware registers
-            ppuAPUAndHardware[offset - 0x2100] = value;
+            ppu->write((bank << 16) | offset, value);
             return;
         }
         else if (offset >= 0x3000 && offset <= 0x3FFF) {
