@@ -15,7 +15,61 @@ uint8_t Memory::read(uint32_t address) {
             return wram[offset];
         }
         else if (offset >= 0x2100 && offset <= 0x21FF) {
-            ppu->read((bank << 16) | offset);
+            if (offset == 0x219 || offset == 0x213a) {
+                // PPU VMDataLo or PPU VMDataHi
+                uint16_t addr = (read(0x2117) << 8) | (read(0x2116));
+                uint8_t vHiLo = read(0x2115) >> 7;
+                uint8_t vTrans = (read(0x2115) & 0b1100) >> 2;
+                uint8_t vStep = read(0x2115) & 0b11;
+
+                uint16_t _tSt, _tOff, _tIn;
+                switch (vTrans) { // PPU address translation
+                case 0b00:
+                    break;
+                case 0b01: // 8 bit
+                    _tSt = (addr & 0b1111111100000000);
+                    _tOff = (addr & 0b11100000) >> 5;
+                    _tIn = (addr & 0b11111) << 3;
+                    addr = _tSt | _tOff | _tIn;
+                    break;
+                case 0b10: // 09 bit
+                    _tSt = (addr & 0b1111111000000000);
+                    _tOff = (addr & 0b111000000) >> 6;
+                    _tIn = (addr & 0b111111) << 3;
+                    addr = _tSt | _tOff | _tIn;
+                    break;
+                case 0b11: // 10 bit
+                    _tSt = (addr & 0b1111110000000000);
+                    _tOff = (addr & 0b1110000000) >> 7;
+                    _tIn = (addr & 0b1111111) << 3;
+                    addr = _tSt | _tOff | _tIn;
+                    break;
+                }
+
+                if (((addr == 0x2139 && !vHiLo) || (addr == 0x213a && vHiLo)) && vTrans != 0) {
+                    uint16_t _t = (read(0x2117) << 8) | read(0x2116);
+
+                    switch (vStep) {
+                    case 0b00: _t += 1; break;
+                    case 0b01: _t += 32; break;
+                    case 0b10: _t += 128; break;
+                    case 0b11: _t += 128; break;
+                    default: break;
+                    }
+
+                    write(0x2116, _t & 0xFF);
+                    write(0x2117, _t >> 8);
+                }
+
+                return (addr == 0x2139) ? ppu->readVRAM(addr) & 0xFF : ppu->readVRAM(addr) >> 8;
+            }
+            else if (offset == 0x213b) { // PPU CGDATA - Palette Data Read
+                write(0x2121, read(0x2121) + 1);
+                return ppu->readCGRAM(read(0x2121) - 1);
+            }
+            else {
+                ppu->read((bank << 16) | offset);
+            }
         }
         else if (offset >= 0x3000 && offset <= 0x3FFF) {
             // DSP, SuperFX, hardware registers
@@ -100,7 +154,18 @@ void Memory::write(uint32_t address, uint8_t value)
         }
         else if (offset >= 0x2100 && offset <= 0x21FF) {
             // PPU1, APU, hardware registers
-            ppu->write((bank << 16) | offset, value);
+            if (address == 0x2118) {
+                ppu->writeVRAMHi(read(0x2117) << 8 | read(0x2116), value);
+            }
+            else if (address == 0x2119) {
+                ppu->writeVRAMLo(read(0x2117) << 8 | read(0x2116), value);
+            }
+            else if (address == 0x2122) {
+                ppu->writeCGRAM(read(0x2121), value, [this]() { ppuCGRAMCallback(); });
+            }
+            else {
+                ppu->write((bank << 16) | offset, value);
+            }
             return;
         }
         else if (offset >= 0x3000 && offset <= 0x3FFF) {

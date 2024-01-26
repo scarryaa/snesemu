@@ -2,6 +2,7 @@
 #define PPU_HPP
 
 #include <stdint.h>
+#include <functional>
 
 // TODO refactor this?
 class Cpu;
@@ -22,13 +23,17 @@ public:
 	uint8_t read(uint32_t address);
 	void write(uint32_t address, uint8_t value);
 
+	void writeVRAMHi(uint16_t address, uint8_t value);
+	void writeVRAMLo(uint16_t address, uint8_t value);
+	void writeCGRAM(uint16_t address, uint8_t value, std::function<void()> f);
+	uint16_t readVRAM(uint16_t address);
+	uint16_t readCGRAM(uint16_t address);
 	void drawBackground();
 
 	void reset();
 	void step(int cycles);
 	void drawPixel(int x, int y, uint32_t color);
 	uint8_t* getFrameBuffer();
-	uint8_t vram[0x20000];
 
 private:
 	static const int XRES = 256;
@@ -38,6 +43,33 @@ private:
 	static const int TOTAL_SCANLINES = 262;
 	int renderX;
 	int renderY;
+
+	enum PpuColorDepth {
+		k2Bpp4Colors,
+		k4Bpp16Colors,
+		k8Bpp256Colors,
+		kOffsetPerTile,
+		kExtBg,
+		kDisabled
+	};
+
+	PpuColorDepth PpuBgModes[8][4] = {
+		{ k2Bpp4Colors, k2Bpp4Colors, k2Bpp4Colors, k2Bpp4Colors },		// mode 0 - 2bpp, 2bpp, 2bpp, 2bpp	Normal
+		{ k4Bpp16Colors, k4Bpp16Colors, k2Bpp4Colors, kDisabled },		// mode 1 - 4bpp, 4bpp, 2bpp, -		Normal
+		{ k4Bpp16Colors, k4Bpp16Colors, kOffsetPerTile, kDisabled },	// mode 2 - 4bpp, 4bpp, OPT, -		Offset-per-tile
+		{ k8Bpp256Colors, k4Bpp16Colors, kDisabled, kDisabled },		// mode 3 - 8bpp, 4bpp -, -			Normal
+		{ k8Bpp256Colors, k2Bpp4Colors, kOffsetPerTile, kDisabled },	// mode 4 - 8bpp, 2bpp, OPT, -		Offset-per-tile
+		{ k4Bpp16Colors, k2Bpp4Colors, kDisabled, kDisabled },			// mode 5 - 4bpp, 2bpp - , -		512-pix-hires
+		{ k4Bpp16Colors, kDisabled, kOffsetPerTile, kDisabled },		// mode 6 - 4bpp, -, OPT, -			512-pix plus OPT
+		{ k8Bpp256Colors, kExtBg, kDisabled, kDisabled }				// mode 7 - 8bpp, EXTBG, -, -		Rotation/Scaling
+	};
+
+	bool cgramFlipFlop;
+	uint8_t cgramLsb;
+
+	// vram, cgram
+	uint16_t vram[0x8000];
+	uint16_t cgram[0x100];
 
 	// registers
 	uint8_t screenBrightnessAndOnOff;

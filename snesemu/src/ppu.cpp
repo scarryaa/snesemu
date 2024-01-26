@@ -185,20 +185,41 @@ void Ppu::write(uint32_t address, uint8_t value) {
 		vramAddrIncrementMode = value;
 		break;
 
-		// 0x2116-0x2117 VRAM address registers
-	case 0x2116:
-		vramAddr1 = value;
-		break;
-	case 0x2117:
-		vramAddr2 = value;
-		break;
-
 		// 0x2133 SNES PPU mode select
 	case 0x2133:
 		ppuMode = value;
 		break;
 	default:
 		return;
+	}
+}
+
+void Ppu::writeVRAMHi(uint16_t address, uint8_t value) {
+	vram[address & 0x7FFF] = (vram[address & 0x7FFF] & 0xFF00) | value;
+}
+
+void Ppu::writeVRAMLo(uint16_t address, uint8_t value) {
+	vram[address & 0x7FFF] = (vram[address & 0x7FFF] & 0xFF) | (value << 8);
+}
+
+uint16_t Ppu::readVRAM(uint16_t address) {
+	return vram[address & 0x7FFF];
+}
+
+uint16_t Ppu::readCGRAM(uint16_t address) {
+	return cgram[address];
+}
+
+void Ppu::writeCGRAM(uint16_t address, uint8_t value, std::function<void()> f) {
+	// if address is even, remember the current value
+	if (!cgramFlipFlop) {
+		cgramLsb = value;
+		cgramFlipFlop = true;
+	}
+	else {
+		cgram[address] = (value << 8) | cgramLsb;
+		cgramFlipFlop = false
+		(f)();
 	}
 }
 

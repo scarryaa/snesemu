@@ -35,6 +35,10 @@ public:
         this->ppu = &ppu;
     }
 
+    void ppuCGRAMCallback() {
+        write(read(0x2121) + 1, 0x2121);
+    }
+
     void startDMA(uint8_t dmaId);
 
     uint8_t read(uint32_t address);
