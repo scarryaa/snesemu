@@ -139,22 +139,21 @@ void Window::renderDisassembly(Emulator* emulator)
 
     // Registers
     // A
-    ImGui::Text("A: %04X", cpu->getA());
+    ImGui::Text("A: %06X", cpu->getA());
     ImGui::SameLine();
 
     // X
-    ImGui::Text("X: %04X", cpu->getX());
+    ImGui::Text("X: %06X", cpu->getX());
     ImGui::SameLine();
 
     // Y
-    ImGui::Text("Y: %04X", cpu->getY());
-    ImGui::SameLine();
+    ImGui::Text("Y: %06X", cpu->getY());
 
     // SP
     ImGui::Text("SP: %04X", cpu->getSP());
 
     // PC
-    ImGui::Text("PC: %04X", cpu->getPC());
+    ImGui::Text("PC: %06X", cpu->getPC());
     ImGui::SameLine();
 
     // P
@@ -261,6 +260,160 @@ void Window::renderDisassembly(Emulator* emulator)
     ImGui::End();
 }
 
+void Window::renderBreakpoints(Emulator* emulator)
+{
+    ImGui::Begin("Breakpoints");
+
+    ImGui::BeginChild("scrolling_region", ImVec2(0, 0), false);
+
+    auto breakpoints = emulator->getBreakpoints();
+    for (auto it = breakpoints.begin(); it != breakpoints.end(); ++it)
+    {
+        ImGui::Text("%04X", *it);
+    }
+
+    ImGui::EndChild();
+
+    ImGui::Button("Clear All");
+
+    if (ImGui::IsItemClicked())
+    {
+        emulator->clearAllBreakpoints();
+    }
+
+    ImGui::SameLine();
+
+    ImGui::Button("Add");
+
+    // Spawn a new window if the button is clicked
+    if (ImGui::IsItemClicked())
+    {
+        ImGui::OpenPopup("Add Breakpoint");
+    }
+
+    // Create the popup window
+    if (ImGui::BeginPopup("Add Breakpoint"))
+    {
+        static char input[5] = "0000";
+        ImGui::InputText("Address", input, 5);
+
+        // Radio button for scanline breakpoint
+        static bool scanline = false;
+        ImGui::RadioButton("Scanline", scanline);
+
+        static bool cycle = false;
+        static bool frame = false;
+        static bool instruction = false;
+        static bool read = false;
+        static bool write = false;
+        static bool execute = false;
+
+        if (ImGui::IsItemClicked())
+        {
+            scanline = true;
+
+            // Clear the other radio buttons
+            cycle = false;
+            frame = false;
+            instruction = false;
+            read = false;
+            write = false;
+            execute = false;
+        }
+
+        // Radio button for cycle breakpoint
+        ImGui::RadioButton("Cycle", cycle);
+
+        if (ImGui::IsItemClicked())
+        {
+            cycle = true;
+
+            // Clear the other radio buttons
+            scanline = false;
+            frame = false;
+            instruction = false;
+            read = false;
+            write = false;
+            execute = false;
+        }
+
+        // Radio button for frame breakpoint
+        ImGui::RadioButton("Frame", frame);
+
+        // Radio button for instruction breakpoint
+        ImGui::RadioButton("Instruction", instruction);
+
+        // Radio button for read breakpoint
+        ImGui::RadioButton("Read", read);
+
+        // Radio button for write breakpoint
+        ImGui::RadioButton("Write", write);
+
+        if (ImGui::IsItemClicked())
+        {
+            write = true;
+
+            // Clear the other radio buttons
+            scanline = false;
+            cycle = false;
+            frame = false;
+            instruction = false;
+            read = false;
+            execute = false;
+        }
+
+        // Radio button for execute breakpoint
+        ImGui::RadioButton("Execute", execute);
+
+        if (ImGui::IsItemClicked())
+        {
+            execute = true;
+
+            // Clear the other radio buttons
+            scanline = false;
+            cycle = false;
+            frame = false;
+            instruction = false;
+            read = false;
+            write = false;
+        }
+
+        // Add the breakpoint
+        if (ImGui::Button("Add"))
+        {
+            // Convert the input to an integer
+            uint16_t value = std::stoi(input, nullptr, 16);
+
+            breakpoint_type_t type;
+
+            if (cycle)
+            {
+                type = BREAKPOINT_TYPE_CYCLE;
+            }
+            else if (instruction)
+            {
+                type = BREAKPOINT_TYPE_EXECUTION;
+            }
+            else if (write)
+            {
+                type = BREAKPOINT_TYPE_WRITE;
+            }
+            else
+            {
+                type = BREAKPOINT_TYPE_ADDRESS;
+            }
+
+            emulator->setBreakpoint(type, value);
+
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+
+    ImGui::End();
+}
+
 void Window::renderCpuMemoryView(Emulator* emulator)
 {
     Memory* memory = emulator->getMemory();
@@ -275,7 +428,7 @@ void Window::renderCpuMemoryView(Emulator* emulator)
     for (int line = 0; line < totalLines; ++line)
     {
         uint16_t addr = line * bytesPerRow;
-        ImGui::Text("%04X: ", addr);
+        ImGui::Text("%06X: ", addr);
         for (int col = 0; col < bytesPerRow; ++col)
         {
             ImGui::SameLine();
@@ -294,6 +447,7 @@ void Window::render(Emulator* emulator) {
 
     this->renderDisassembly(emulator);
     this->renderCpuMemoryView(emulator);
+    this->renderBreakpoints(emulator);
 }
 
 void Window::postRender(uint8_t* frameBuffer) {

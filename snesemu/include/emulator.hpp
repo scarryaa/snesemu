@@ -56,6 +56,10 @@ public:
 		breakpoints.insert({ type, value });
 	}
 
+	void clearAllBreakpoints() {
+		breakpoints.clear();
+	}
+
 	void checkForBreakpoints();
 
 	void pause() {

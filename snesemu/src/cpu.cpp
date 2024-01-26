@@ -31,33 +31,30 @@ uint32_t Cpu::getAbsLong()
 
 uint32_t Cpu::getAbsIndexedX()
 {
-	regs.PC += 2;
-	uint16_t addr = ((memory->read((regs.PBR << 16) | regs.PC) <<
-		8) | memory->read((regs.PBR << 16) | regs.PC - 1));
-	pbr = (addr & 0xFF00) != ((addr + regs.X) & 0xFF00);
+	uint32_t address = (regs.PBR << 16) | regs.PC;
+	uint32_t addr = (memory->read(address + 1) << 8) | memory->read(address);
 	addr += regs.X;
+	regs.PC += 2;
 	return (regs.DBR << 16) | addr;
 }
 
 uint32_t Cpu::getAbsIndexedY() {
-	uint16_t lowByte = memory->read((regs.PBR << 16) | regs.PC);
-	regs.PC++;
-	uint16_t highByte = memory->read((regs.PBR << 16) | regs.PC);
-	regs.PC++;
-
-	uint16_t addr = (highByte << 8) | lowByte;
-	pbr = (addr & 0xFF00) != ((addr + regs.Y) & 0xFF00);
+	uint32_t address = (regs.PBR << 16) | regs.PC;
+	uint32_t addr = (memory->read(address + 1) << 8) | memory->read(address);
 	addr += regs.Y;
-
+	regs.PC += 2;
 	return (regs.DBR << 16) | addr;
 }
 
 uint32_t Cpu::getAbsLongIndexedX()
 {
+	uint32_t address = (regs.PBR << 16) | regs.PC;
+	uint32_t value = (memory->read(address + 2) << 16) |
+		(memory->read(address + 1) << 8) |
+		memory->read(address);
+	value += regs.X;
 	regs.PC += 3;
-	return ((memory->read((regs.PBR << 16) | regs.PC) <<
-		16) | (memory->read((regs.PBR << 16) | regs.PC - 1) << 8) |
-		memory->read((regs.PBR << 16) | regs.PC - 2)) + regs.X;
+	return value;
 }
 
 uint32_t Cpu::getAbsIndirect()
@@ -797,7 +794,6 @@ uint8_t Cpu::BIT(uint32_t(Cpu::* f)(), uint8_t cycles, bool isImmediate) {
 	if (regs.P.M) {
 		// 8-bit mode
 		uint8_t val = memory->read((this->*f)());
-		printf("BIT %04X ", val);
 
 		if (!isImmediate) {
 			regs.P.N = (val >> 7);

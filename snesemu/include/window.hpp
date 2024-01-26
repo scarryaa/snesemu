@@ -21,6 +21,7 @@ public:
     void postRender(uint8_t* frame_buffer);
     void renderDisassembly(Emulator* emulator);
     void renderCpuMemoryView(Emulator* emulator);
+    void renderBreakpoints(Emulator* emulator);
 
 private:
     SDL_Window* window;
