@@ -35,6 +35,8 @@ public:
         this->ppu = &ppu;
     }
 
+    void startDMA(uint8_t dmaId);
+
     uint8_t read(uint32_t address);
     void write(uint32_t address, uint8_t value);
 
@@ -45,6 +47,22 @@ private:
 
     std::vector<uint8_t> wram;
     std::vector<uint8_t> sram;
+
+    // DMA registers
+    struct DMA {
+        uint8_t params;
+        uint8_t bAddress;
+        uint8_t aAddressLo;
+        uint8_t aAddressHi;
+        uint8_t aAddressBank;
+        uint8_t dmaNumberBytesToTransferLo;
+        uint8_t dmaNumberBytesToTransferHi;
+        uint8_t hdmaDataBank;
+        uint8_t a2TableAddressLo;
+        uint8_t a2TableAddressHi;
+        uint8_t hdmaNumberOfLinesToTransfer;
+    };
+    DMA dma[8];
 
     std::vector<uint8_t> ppuRegisters;
     std::vector<uint8_t> ppuAPUAndHardware;
