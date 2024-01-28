@@ -20,15 +20,14 @@ public:
 		this->cpu = &cpu;
 	}
 
-	uint8_t read(uint32_t address);
-	void write(uint32_t address, uint8_t value);
-
 	void writeVRAMHi(uint16_t address, uint8_t value);
 	void writeVRAMLo(uint16_t address, uint8_t value);
 	void writeCGRAM(uint16_t address, uint8_t value, std::function<void()> f);
 	uint16_t readVRAM(uint16_t address);
 	uint16_t readCGRAM(uint16_t address);
-	void drawBackground();
+	void drawBackground2Bpp();
+	void writeBGTileBase(uint8_t id, uint8_t value);
+	void writeBGBaseAddrScreenSize(uint8_t id, uint8_t value);
 
 	void reset();
 	void step(int cycles);
@@ -70,6 +69,12 @@ private:
 	// vram, cgram
 	uint16_t vram[0x8000];
 	uint16_t cgram[0x100];
+
+	// bg
+	uint16_t bgTilesH[4] = { 32, 32, 32, 32 };
+	uint16_t bgTilesV[4] = { 32, 32, 32, 32 };
+	uint16_t bgBase[4] = { 0, 0, 0, 0 };
+	uint16_t bgTileBase[4] = { 0, 0, 0, 0 };
 
 	// registers
 	uint8_t screenBrightnessAndOnOff;

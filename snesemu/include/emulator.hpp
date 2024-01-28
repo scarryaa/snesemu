@@ -29,6 +29,10 @@ public:
 		return &memory;
 	}
 
+	Ppu* getPpu() {
+		return &ppu;
+	}
+
 	Cpu* getCpu() {
 		return &cpu;
 	}

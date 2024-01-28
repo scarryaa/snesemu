@@ -18,8 +18,7 @@ class Memory
 public:
     Memory(Cartridge *cartridge) :
         cartridge(cartridge),
-        wram(WRAM_SIZE),
-        sram(SRAM_SIZE),
+        memory(0xFFFFFF),
         ppuRegisters(0x100),
         ppuAPUAndHardware(0x100),
         dmaAndPPU2(0x300),
@@ -49,8 +48,7 @@ private:
     Cpu* cpu;
     Ppu* ppu;
 
-    std::vector<uint8_t> wram;
-    std::vector<uint8_t> sram;
+    std::vector<uint8_t> memory;
 
     // DMA registers
     struct DMA {
@@ -74,9 +72,6 @@ private:
     std::vector<uint8_t> dspSuperFXAndHardware;
     std::vector<uint8_t> oldJoypad;
     std::vector<uint8_t> dmaPPU2AndHardware;
-
-    constexpr static size_t WRAM_SIZE = 0x20000;   // 128KB WRAM
-    constexpr static size_t SRAM_SIZE = 0x112000;    // 448K SRAM
 };
 
 #endif

@@ -414,6 +414,31 @@ void Window::renderBreakpoints(Emulator* emulator)
     ImGui::End();
 }
 
+void Window::renderVramView(Emulator* emulator) {
+    Ppu* ppu = emulator->getPpu();
+
+    ImGui::Begin("VRAM");
+
+    const int bytesPerRow = 16;
+    const int totalLines = 0x8000 / bytesPerRow;
+
+    ImGui::BeginChild("VramScrolling", ImVec2(0, 0), false, 0);
+
+    for (int line = 0; line < totalLines; ++line)
+    {
+        uint16_t addr = line * bytesPerRow;
+        ImGui::Text("%06X: ", addr);
+        for (int col = 0; col < bytesPerRow; ++col)
+        {
+            ImGui::SameLine();
+            ImGui::Text("%02X ", ppu->readVRAM(addr + col));
+        }
+    }
+
+    ImGui::EndChild();
+    ImGui::End();
+}
+
 void Window::renderCpuMemoryView(Emulator* emulator)
 {
     Memory* memory = emulator->getMemory();
@@ -448,6 +473,7 @@ void Window::render(Emulator* emulator) {
     this->renderDisassembly(emulator);
     this->renderCpuMemoryView(emulator);
     this->renderBreakpoints(emulator);
+    this->renderVramView(emulator);
 }
 
 void Window::postRender(uint8_t* frameBuffer) {

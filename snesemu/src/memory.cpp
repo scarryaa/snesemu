@@ -12,63 +12,59 @@ uint8_t Memory::read(uint32_t address) {
     if (bank <= 0x3F) {
         if (offset < 0x2000) {
             // LowRAM, shadowed from bank $7E
-            return wram[offset];
+            return memory[offset];
         }
         else if (offset >= 0x2100 && offset <= 0x21FF) {
-            if (offset == 0x219 || offset == 0x213a) {
+            if (offset == 0x2139 || offset == 0x213a) {
                 // PPU VMDataLo or PPU VMDataHi
-                uint16_t addr = (read(0x2117) << 8) | (read(0x2116));
-                uint8_t vHiLo = read(0x2115) >> 7;
-                uint8_t vTrans = (read(0x2115) & 0b1100) >> 2;
-                uint8_t vStep = read(0x2115) & 0b11;
-
-                uint16_t _tSt, _tOff, _tIn;
-                switch (vTrans) { // PPU address translation
+                uint16_t adr = (memory[0x2117] << 8) | memory[0x2116];
+                uint8_t _v_hi_lo = memory[0x2115] >> 7;
+                uint8_t _v_trans = (memory[0x2115] & 0b1100) >> 2;
+                uint8_t _v_step = memory[0x2115] & 0b11;
+                uint16_t _t_st, _t_off, _t_in;
+                switch (_v_trans) { //	PPU - Apply address translation if necessary (leftshift thrice lower 8, 9 or 10 bits)
                 case 0b00:
                     break;
-                case 0b01: // 8 bit
-                    _tSt = (addr & 0b1111111100000000);
-                    _tOff = (addr & 0b11100000) >> 5;
-                    _tIn = (addr & 0b11111) << 3;
-                    addr = _tSt | _tOff | _tIn;
+                case 0b01:		//	8 bit, aaaaaaaYYYxxxxx becomes aaaaaaaxxxxxYYY
+                    _t_st = (adr & 0b1111111100000000);
+                    _t_off = (adr & 0b11100000) >> 5;
+                    _t_in = (adr & 0b11111) << 3;
+                    adr = _t_st | _t_off | _t_in;
                     break;
-                case 0b10: // 09 bit
-                    _tSt = (addr & 0b1111111000000000);
-                    _tOff = (addr & 0b111000000) >> 6;
-                    _tIn = (addr & 0b111111) << 3;
-                    addr = _tSt | _tOff | _tIn;
+                case 0b10:		//	9 bit, aaaaaaYYYxxxxxP becomes aaaaaaxxxxxPYYY
+                    _t_st = (adr & 0b1111111000000000);
+                    _t_off = (adr & 0b111000000) >> 6;
+                    _t_in = (adr & 0b111111) << 3;
+                    adr = _t_st | _t_off | _t_in;
                     break;
-                case 0b11: // 10 bit
-                    _tSt = (addr & 0b1111110000000000);
-                    _tOff = (addr & 0b1110000000) >> 7;
-                    _tIn = (addr & 0b1111111) << 3;
-                    addr = _tSt | _tOff | _tIn;
+                case 0b11:		//	10 bit, aaaaaYYYxxxxxPP becomes aaaaaxxxxxPPYYY
+                    _t_st = (adr & 0b1111110000000000);
+                    _t_off = (adr & 0b1110000000) >> 7;
+                    _t_in = (adr & 0b1111111) << 3;
+                    adr = _t_st | _t_off | _t_in;
                     break;
                 }
-
-                if (((addr == 0x2139 && !vHiLo) || (addr == 0x213a && vHiLo)) && vTrans != 0) {
-                    uint16_t _t = (read(0x2117) << 8) | read(0x2116);
-
-                    switch (vStep) {
-                    case 0b00: _t += 1; break;
+                if (((adr == 0x2139 && !_v_hi_lo) || (adr == 0x213a && _v_hi_lo)) && _v_trans != 0) {
+                    uint16_t _t = (memory[0x2117] << 8) | memory[0x2116];
+                    switch (_v_step)
+                    {
+                    case 0b00: _t += 1;	break;
                     case 0b01: _t += 32; break;
                     case 0b10: _t += 128; break;
                     case 0b11: _t += 128; break;
                     default: break;
                     }
-
-                    write(0x2116, _t & 0xFF);
-                    write(0x2117, _t >> 8);
+                    memory[0x2116] = _t & 0xff;
+                    memory[0x2117] = _t >> 8;
                 }
 
-                return (addr == 0x2139) ? ppu->readVRAM(addr) & 0xFF : ppu->readVRAM(addr) >> 8;
+                return (address == 0x2139) ? ppu->readVRAM(address) & 0xFF : ppu->readVRAM(address) >> 8;
             }
             else if (offset == 0x213b) { // PPU CGDATA - Palette Data Read
-                write(0x2121, read(0x2121) + 1);
-                return ppu->readCGRAM(read(0x2121) - 1);
+                return ppu->readCGRAM(memory[0x2121]);
             }
             else {
-                ppu->read((bank << 16) | offset);
+                return memory[bank << 16 | offset];
             }
         }
         else if (offset >= 0x3000 && offset <= 0x3FFF) {
@@ -103,7 +99,7 @@ uint8_t Memory::read(uint32_t address) {
     else if (bank >= 0x70 && bank <= 0x7D) {
         if (offset < 0x8000) {
             // Cartridge SRAM
-            return sram[(bank - 0x70) * 0x8000 + offset];
+            return memory[(bank - 0x70) * 0x8000 + offset];
         }
         else {
             // LoROM section
@@ -111,7 +107,7 @@ uint8_t Memory::read(uint32_t address) {
         }
     }
     else if (bank >= 0x7E && bank <= 0x7F) {
-        return wram[(address - 0x7E * 0x10000 + offset)];
+        return memory[(address - 0x7E * 0x10000 + offset)];
     }
     else if (bank >= 0x80 && bank <= 0xBF) {
         // Mirror of $00–$3F
@@ -149,22 +145,85 @@ void Memory::write(uint32_t address, uint8_t value)
     if (bank <= 0x3F) {
         if (offset < 0x2000) {
             // LowRAM, shadowed from bank $7E
-            wram[offset] = value;
+            memory[offset] = value;
             return;
         }
         else if (offset >= 0x2100 && offset <= 0x21FF) {
             // PPU1, APU, hardware registers
-            if (address == 0x2118) {
-                ppu->writeVRAMHi(read(0x2117) << 8 | read(0x2116), value);
+            if (address == 0x2107) {
+                ppu->writeBGBaseAddrScreenSize(0, value);
             }
-            else if (address == 0x2119) {
-                ppu->writeVRAMLo(read(0x2117) << 8 | read(0x2116), value);
+            else if (address == 0x2108) {
+                ppu->writeBGBaseAddrScreenSize(1, value);
+            }
+            else if (address == 0x2109) {
+                ppu->writeBGBaseAddrScreenSize(2, value);
+            }
+            else if (address == 0x210A) {
+                ppu->writeBGBaseAddrScreenSize(3, value);
+            } else if (address == 0x2118 || address == 0x2119) {
+                //https://github.com/LilaQ/q00.snes/blob/master/bus.cpp
+                uint16_t _adr = (memory[0x2117] << 8) | memory[0x2116];
+                uint8_t _v_hi_lo = memory[0x2115] >> 7;
+                uint8_t _v_trans = (memory[0x2115] & 0b1100) >> 2;
+                uint8_t _v_step = memory[0x2115] & 0b11;
+                switch (_v_trans) {		//	PPU - Apply address translation if necessary (leftshift thrice lower 8, 9 or 10 bits)
+                case 0b00:
+                    break;
+                case 0b01: {		//	8 bit, aaaaaaaYYYxxxxx becomes aaaaaaaxxxxxYYY
+                    uint16_t _t_st = (_adr & 0b1111111100000000);
+                    uint16_t _t_off = (_adr & 0b11100000) >> 5;
+                    uint16_t _t_in = (_adr & 0b11111) << 3;
+                    _adr = _t_st | _t_off | _t_in;
+                    break;
+                }
+                case 0b10: {		//	9 bit, aaaaaaYYYxxxxxP becomes aaaaaaxxxxxPYYY
+                    uint16_t _t_st = (_adr & 0b1111111000000000);
+                    uint16_t _t_off = (_adr & 0b111000000) >> 6;
+                    uint16_t _t_in = (_adr & 0b111111) << 3;
+                    _adr = _t_st | _t_off | _t_in;
+                    break;
+                }
+                case 0b11: {		//	10 bit, aaaaaYYYxxxxxPP becomes aaaaaxxxxxPPYYY
+                    uint16_t _t_st = (_adr & 0b1111110000000000);
+                    uint16_t _t_off = (_adr & 0b1110000000) >> 7;
+                    uint16_t _t_in = (_adr & 0b1111111) << 3;
+                    _adr = _t_st | _t_off | _t_in;
+                    break;
+                }
+                }
+                if ((address == 0x2118 && !_v_hi_lo) || (address == 0x2119 && _v_hi_lo)) {
+                    uint16_t _t = _adr;
+                    switch (_v_step)
+                    {
+                    case 0b00: _t += 1;	break;
+                    case 0b01: _t += 32; break;
+                    case 0b10: _t += 128; break;
+                    case 0b11: _t += 128; break;
+                    default: break;
+                    }
+                    memory[0x2116] = _t & 0xff;
+                    memory[0x2117] = _t >> 8;
+                }
+                if (address == 0x2118) {
+                    ppu->writeVRAMLo(_adr, value);
+                }
+                else {
+                    ppu->writeVRAMHi(_adr, value);
+                }
             }
             else if (address == 0x2122) {
-                ppu->writeCGRAM(read(0x2121), value, [this]() { ppuCGRAMCallback(); });
+                ppu->writeCGRAM(memory[0x2121], value, [this]() { ppuCGRAMCallback(); });
             }
-            else {
-                ppu->write((bank << 16) | offset, value);
+            else if (address == 0x210B) {
+                // PPU BG/BG2 Tile Base
+                ppu->writeBGTileBase(0, (value & 0xF));
+                ppu->writeBGTileBase(1, (value >> 4));
+            }
+            else if (address == 0x210C) {
+                // PPU BG3/BG4 Tile Base
+                ppu->writeBGTileBase(2, (value & 0xF));
+                ppu->writeBGTileBase(3, (value >> 4));
             }
             return;
         }
@@ -258,11 +317,13 @@ void Memory::write(uint32_t address, uint8_t value)
     else if (bank >= 0x70 && bank <= 0x7D) {
         if (offset < 0x8000) {
             // Cartridge SRAM
-            sram[(bank - 0x70) * 0x8000 + offset] = value;
+            memory[(bank - 0x70) * 0x8000 + offset] = value;
             return;
         }
     }
-    // TODO other banks and offsets
+    else {
+        memory[bank * 0x8000 + offset] = value;
+    }
 
     // Log invalid writes
     std::ostringstream oss;
@@ -291,7 +352,7 @@ void Memory::startDMA(uint8_t dmaId) {
                 write(read(bAddr), aAddr);
             }
             else {
-                write(read(aAddr), bAddr);
+                write(memory[aAddr], bAddr);
             }
 
             bytes--;
@@ -304,9 +365,9 @@ void Memory::startDMA(uint8_t dmaId) {
                 write(read(bAddr + 1), aAddr + 1);
             }
             else {
-                write(read(aAddr), bAddr);
+                write(memory[aAddr], bAddr);
                 bytes--;
-                write(read(aAddr + 1), bAddr + 1);
+                write(memory[aAddr + 1], bAddr + 1);
             }
             
             bytes--;
@@ -319,9 +380,9 @@ void Memory::startDMA(uint8_t dmaId) {
                 write(read(bAddr + 1), aAddr);
             }
             else {
-                write(read(aAddr), bAddr);
+                write(memory[aAddr], bAddr);
                 bytes--;
-                write(read(aAddr + 1), bAddr);
+                write(memory[aAddr + 1], bAddr);
             }
 
             bytes--;
@@ -338,19 +399,19 @@ void Memory::startDMA(uint8_t dmaId) {
                 write(read(bAddr + 3), aAddr + 1);
             }
             else {
-                write(read(aAddr), bAddr);
+                write(memory[aAddr], bAddr);
                 bytes--;
-                write(read(aAddr + 1), bAddr);
+                write(memory[aAddr + 1], bAddr);
                 bytes--;
-                write(read(aAddr + 2), bAddr + 1);
+                write(memory[aAddr + 2], bAddr + 1);
                 bytes--;
-                write(read(aAddr + 3), bAddr + 1);
+                write(memory[aAddr + 3], bAddr + 1);
             }
 
             bytes--;
             aAddr += (dmaStep == 0) ? 4 : ((dmaStep == 2) ? -4 : 0);
             break;
-        case 4: // trqansfer 4 bytes (xx, xx + 1, xx + 2, xx + 3)
+        case 4: // transfer 4 bytes (xx, xx + 1, xx + 2, xx + 3)
             if (direction) {
                 write(read(bAddr), aAddr);
                 bytes--;
@@ -361,13 +422,13 @@ void Memory::startDMA(uint8_t dmaId) {
                 write(read(bAddr + 3), aAddr + 3);
             }
             else {
-                write(read(aAddr), bAddr);
+                write(memory[aAddr], bAddr);
                 bytes--;
-                write(read(aAddr + 1), bAddr + 1);
+                write(memory[aAddr + 1], bAddr + 1);
                 bytes--;
-                write(read(aAddr + 2), bAddr + 2);
+                write(memory[aAddr + 2], bAddr + 2);
                 bytes--;
-                write(read(aAddr + 3), bAddr + 3);
+                write(memory[aAddr + 3], bAddr + 3);
             }
 
             bytes--;

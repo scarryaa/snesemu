@@ -33,7 +33,7 @@ void Emulator::run() {
 				break;
 			}
 
-			logState();
+			//logState();
 			cycles = cpu.step();
 			cycles_to_run -= cycles;
 
