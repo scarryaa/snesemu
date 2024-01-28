@@ -36,7 +36,7 @@ public:
 
 private:
 	static const int XRES = 256;
-	static const int YRES = 240;
+	static const int YRES = 239;
 	static const int COLOR_DEPTH = 4;
 	static const int VBLANK_PERIOD = 70;
 	static const int TOTAL_SCANLINES = 262;

@@ -26,7 +26,7 @@ void Ppu::step(int cycles) {
 }
 
 void Ppu::writeVRAMHi(uint16_t address, uint8_t value) {
-	vram[address & 0x7fff] = (vram[address & 0x7fff] & 0xff00) | value;
+	vram[address & 0x7FFF] = (vram[address & 0x7FFF] & 0xFF00) | value;
 }
 
 void Ppu::writeVRAMLo(uint16_t address, uint8_t value) {
@@ -55,23 +55,19 @@ void Ppu::writeCGRAM(uint16_t address, uint8_t value, std::function<void()> f) {
 }
 
 void Ppu::drawBackground2Bpp() {
-	for (int pixel = 0; pixel < XRES * YRES; pixel++) {
-		int x = pixel % XRES;
-		int y = pixel / XRES;
-		int i = x % 8;
-		int j = y % 8;
-
-		uint16_t tileId = bgBase[0] + x / 8 + y / 8 * 16;
-		uint16_t tileDataBit1 = vram[tileId + i + j * 2];
-		uint16_t tileDataBit2 = vram[tileId + i + j * 2 + 1];
-
-		uint8_t color = (tileDataBit2 << 1) | tileDataBit1;
-		uint16_t colorHigh = ((color & 0xE0) << 7) | ((color & 0x1C) << 3) | ((color & 0x03) << 2);
-
-		drawPixel(x, y, colorHigh);
+	for (uint16_t a = 0x0000; a < 0x3a0; a++) {
+		uint16_t tile_id = vram[0x7c00 + a];
+		uint16_t tile_address = tile_id * 8;
+		for (int i = 0; i < 8; i++) {
+			const uint8_t b_lo = vram[tile_address + i] >> 8;
+			const uint8_t b_hi = vram[tile_address + i] & 0xff;
+			for (int j = 0; j < 8; j++) {
+				uint8_t v = (((b_lo >> (7 - j)) & 1) + (2 * ((b_hi >> (7 - j)) & 1))) > 0;
+				drawPixel(a % 32 * 8 + j, a / 32 * 8 + i, (v) ? 0xffffff : 0x0000ff);
+			}
+		}
 	}
 }
-
 
 void Ppu::writeBGBaseAddrScreenSize(uint8_t id, uint8_t value) {
 	bgBase[id] = ((value >> 2) << 10) & 0x7FFF;
@@ -98,16 +94,11 @@ void Ppu::reset() {
 	}
 }
 
-void Ppu::drawPixel(int x, int y, uint32_t color) {
-	if (x < 0 || x >= XRES || y < 0 || y >= YRES)
-	{
-		return;
-	}
-
-	int index = (y * XRES + x) * 3;
-	this->frameBuffer[index] = color & 0xFF;             // Blue
-	this->frameBuffer[index + 1] = (color >> 8) & 0xFF;  // Green
-	this->frameBuffer[index + 2] = (color >> 16) & 0xFF; // Red
+void Ppu::drawPixel(int x, int y, uint32_t v) {
+	frameBuffer[y * 4 * 256 + x * 4] = v >> 16;
+	frameBuffer[y * 4 * 256 + x * 4 + 1] = v >> 8 & 0xff;
+	frameBuffer[y * 4 * 256 + x * 4 + 2] = v & 0xff;
+	frameBuffer[y * 4 * 256 + x * 4 + 3] = 0xff;
 }
 
 uint8_t* Ppu::getFrameBuffer() {

@@ -23,6 +23,7 @@ public:
     void renderCpuMemoryView(Emulator* emulator);
     void renderVramView(Emulator* emulator);
     void renderBreakpoints(Emulator* emulator);
+    void renderCgramView(Emulator* emulator);
 
 private:
     SDL_Window* window;

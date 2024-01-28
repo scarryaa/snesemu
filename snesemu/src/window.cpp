@@ -11,7 +11,7 @@ Window::Window() {
 
     window = SDL_CreateWindow("snesemu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, 256, 240);
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, 256, 224);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -260,6 +260,31 @@ void Window::renderDisassembly(Emulator* emulator)
     ImGui::End();
 }
 
+void Window::renderCgramView(Emulator* emulator) {
+    Ppu* ppu = emulator->getPpu();
+
+    ImGui::Begin("CGRAM");
+
+    const int bytesPerRow = 16;
+    const int totalLines = 0x100 / bytesPerRow;
+
+    ImGui::BeginChild("CgramScrolling", ImVec2(0, 0), false, 0);
+
+    for (int line = 0; line < totalLines; ++line)
+    {
+        uint16_t addr = line * bytesPerRow;
+        ImGui::Text("%06X: ", addr);
+        for (int col = 0; col < bytesPerRow; ++col)
+        {
+            ImGui::SameLine();
+            ImGui::Text("%02X ", ppu->readVRAM(addr + col));
+        }
+    }
+
+    ImGui::EndChild();
+    ImGui::End();
+}
+
 void Window::renderBreakpoints(Emulator* emulator)
 {
     ImGui::Begin("Breakpoints");
@@ -474,6 +499,7 @@ void Window::render(Emulator* emulator) {
     this->renderCpuMemoryView(emulator);
     this->renderBreakpoints(emulator);
     this->renderVramView(emulator);
+    this->renderCgramView(emulator);
 }
 
 void Window::postRender(uint8_t* frameBuffer) {
@@ -482,7 +508,7 @@ void Window::postRender(uint8_t* frameBuffer) {
 
     ImGui::Render();
     SDL_RenderClear(this->renderer);
-    SDL_UpdateTexture(this->texture, nullptr, frameBuffer, 256 * 3);
+    SDL_UpdateTexture(this->texture, nullptr, frameBuffer, 256 * sizeof(uint8_t) * 4);
     SDL_RenderCopy(this->renderer, this->texture, nullptr, nullptr);
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
     SDL_RenderPresent(this->renderer);
