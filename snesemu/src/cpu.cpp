@@ -1287,7 +1287,7 @@ uint8_t Cpu::PLY(uint8_t cycles) {
 		regs.Y = (regs.Y & 0xFF00) | pull();
 
 		regs.P.N = regs.Y & 0x0080;
-		regs.P.Z = regs.Y & 0x00FF == 0;
+		regs.P.Z = (regs.Y & 0x00FF) == 0;
 	}
 	else {
 		// 16-bit mode
@@ -1322,6 +1322,9 @@ uint8_t Cpu::PER(uint8_t cycles) {
 uint8_t Cpu::STZ(uint32_t(Cpu::* f)(), uint8_t cycles) {
 	uint32_t addr = (this->*f)();
 	memory->write(addr, 0); // Always write zero
+	if (!regs.P.M) {
+		memory->write(addr + 1, 0);
+	}
 
 	return cycles;
 }

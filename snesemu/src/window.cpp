@@ -277,7 +277,7 @@ void Window::renderCgramView(Emulator* emulator) {
         for (int col = 0; col < bytesPerRow; ++col)
         {
             ImGui::SameLine();
-            ImGui::Text("%02X ", ppu->readVRAM(addr + col));
+            ImGui::Text("%02X ", ppu->readCGRAM(addr + col));
         }
     }
 

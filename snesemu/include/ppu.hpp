@@ -22,12 +22,13 @@ public:
 
 	void writeVRAMHi(uint16_t address, uint8_t value);
 	void writeVRAMLo(uint16_t address, uint8_t value);
-	void writeCGRAM(uint16_t address, uint8_t value, std::function<void()> f);
+	bool writeCGRAM(uint16_t address, uint8_t value);
 	uint16_t readVRAM(uint16_t address);
 	uint16_t readCGRAM(uint16_t address);
 	void drawBackground2Bpp();
 	void writeBGTileBase(uint8_t id, uint8_t value);
 	void writeBGBaseAddrScreenSize(uint8_t id, uint8_t value);
+	uint32_t getRGBAFromCGRAM(uint8_t id);
 
 	void reset();
 	void step(int cycles);
@@ -63,7 +64,7 @@ private:
 		{ k8Bpp256Colors, kExtBg, kDisabled, kDisabled }				// mode 7 - 8bpp, EXTBG, -, -		Rotation/Scaling
 	};
 
-	bool cgramFlipFlop;
+	bool cgramFlipFlop = false;
 	uint8_t cgramLsb;
 
 	// vram, cgram

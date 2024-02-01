@@ -26,7 +26,7 @@ void Ppu::step(int cycles) {
 }
 
 void Ppu::writeVRAMHi(uint16_t address, uint8_t value) {
-	vram[address & 0x7FFF] = (vram[address & 0x7FFF] & 0xFF00) | value;
+	vram[address & 0x7FFF] = value & 0xff;
 }
 
 void Ppu::writeVRAMLo(uint16_t address, uint8_t value) {
@@ -41,17 +41,25 @@ uint16_t Ppu::readCGRAM(uint16_t address) {
 	return cgram[address];
 }
 
-void Ppu::writeCGRAM(uint16_t address, uint8_t value, std::function<void()> f) {
+bool Ppu::writeCGRAM(uint16_t address, uint8_t value) {
 	// if address is even, remember the current value
 	if (!cgramFlipFlop) {
 		cgramLsb = value;
 		cgramFlipFlop = true;
+		return false;
 	}
 	else {
 		cgram[address] = (value << 8) | cgramLsb;
-		cgramFlipFlop = false
-		(f)();
+		cgramFlipFlop = false;
+		return true;
 	}
+}
+
+uint32_t Ppu::getRGBAFromCGRAM(uint8_t id) {
+	uint8_t r = (cgram[id] & 0b11111) * 255 / 31;
+	uint8_t g = ((cgram[id] >> 5) & 0b11111) * 255 / 31;
+	uint8_t b = ((cgram[id] >> 10) & 0b11111) * 255 / 31;
+	return (r << 24) | (g << 16) | (b << 8) | 0xff;
 }
 
 void Ppu::drawBackground2Bpp() {
@@ -63,7 +71,7 @@ void Ppu::drawBackground2Bpp() {
 			const uint8_t b_hi = vram[tile_address + i] & 0xff;
 			for (int j = 0; j < 8; j++) {
 				uint8_t v = (((b_lo >> (7 - j)) & 1) + (2 * ((b_hi >> (7 - j)) & 1))) > 0;
-				drawPixel(a % 32 * 8 + j, a / 32 * 8 + i, (v) ? 0xffffff : 0x0000ff);
+				drawPixel(a % 32 * 8 + j, a / 32 * 8 + i, getRGBAFromCGRAM(v));
 			}
 		}
 	}

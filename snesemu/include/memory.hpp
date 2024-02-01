@@ -38,7 +38,6 @@ public:
         write(0x2121, read(0x2121) + 1);
     }
 
-    uint16_t BUS_DMAtransfer(uint8_t dma_id, uint8_t dma_mode, uint8_t dma_dir, uint8_t dma_step, uint32_t& cpu_address, uint8_t io_address, uint16_t bytes_left);
     void startDMA();
 
     uint8_t read(uint32_t address);
