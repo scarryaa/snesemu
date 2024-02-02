@@ -26,11 +26,11 @@ void Ppu::step(int cycles) {
 }
 
 void Ppu::writeVRAMHi(uint16_t address, uint8_t value) {
-	vram[address & 0x7FFF] = value & 0xff;
+	vram[address & 0x7FFF] = value & 0xFF;
 }
 
 void Ppu::writeVRAMLo(uint16_t address, uint8_t value) {
-	vram[address & 0x7fff] = (vram[address & 0x7fff] & 0xff) | (value << 8);
+	vram[address & 0x7fff] = value & 0xFF;
 }
 
 uint16_t Ppu::readVRAM(uint16_t address) {
@@ -49,7 +49,7 @@ bool Ppu::writeCGRAM(uint16_t address, uint8_t value) {
 		return false;
 	}
 	else {
-		cgram[address] = (value << 8) | cgramLsb;
+		cgram[address] = cgramLsb << 8 | value;
 		cgramFlipFlop = false;
 		return true;
 	}

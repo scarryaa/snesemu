@@ -456,7 +456,8 @@ void Window::renderVramView(Emulator* emulator) {
         for (int col = 0; col < bytesPerRow; ++col)
         {
             ImGui::SameLine();
-            ImGui::Text("%02X ", ppu->readVRAM(addr + col));
+            uint8_t byteValue = ppu->readVRAM(addr + col);
+            ImGui::Text("%02X ", byteValue);
         }
     }
 

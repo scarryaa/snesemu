@@ -156,15 +156,19 @@ void Memory::write(uint32_t address, uint8_t value)
             // PPU1, APU, hardware registers
             if (address == 0x2107) {
                 ppu->writeBGBaseAddrScreenSize(0, value);
+                return;
             }
             else if (address == 0x2108) {
                 ppu->writeBGBaseAddrScreenSize(1, value);
+                return;
             }
             else if (address == 0x2109) {
                 ppu->writeBGBaseAddrScreenSize(2, value);
+                return;
             }
             else if (address == 0x210A) {
                 ppu->writeBGBaseAddrScreenSize(3, value);
+                return;
             }
             else if (address == 0x2118 || address == 0x2119) {
                 //https://github.com/LilaQ/q00.snes/blob/master/bus.cpp
@@ -225,13 +229,16 @@ void Memory::write(uint32_t address, uint8_t value)
                 // PPU BG/BG2 Tile Base
                 ppu->writeBGTileBase(0, (value & 0xF));
                 ppu->writeBGTileBase(1, (value >> 4));
+                return;
             }
             else if (address == 0x210C) {
                 // PPU BG3/BG4 Tile Base
                 ppu->writeBGTileBase(2, (value & 0xF));
                 ppu->writeBGTileBase(3, (value >> 4));
+                return;
             }
             memory[offset] = value;
+            return;
         }
         else if (offset >= 0x3000 && offset <= 0x3FFF) {
             // DSP, SuperFX, hardware registers
@@ -250,7 +257,10 @@ void Memory::write(uint32_t address, uint8_t value)
                 if (value > 0) startDMA();
                 return;
             }
-            else memory[offset] = value;
+            else {
+                memory[offset] = value;
+                return;
+            }
         }
         // TODO other regions
     }
@@ -270,6 +280,7 @@ void Memory::write(uint32_t address, uint8_t value)
     }
     else {
         memory[bank * 0x8000 + offset] = value;
+        return;
     }
 
     // Log invalid writes
