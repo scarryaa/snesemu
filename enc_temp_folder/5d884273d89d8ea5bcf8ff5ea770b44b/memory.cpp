@@ -77,7 +77,8 @@ uint8_t Memory::read(uint32_t address) {
             // old style joypad registers
 
             return oldJoypad[offset - 0x4000];
-        } else if (offset >= 0x4200 && offset <= 0x44FF)
+        }
+        else if (offset >= 0x4200 && offset <= 0x44FF)
         {
             if (offset == 0x4210) {
                 bool isNMI = cpu->isInterruptSet(Interrupts::NMI);
@@ -88,7 +89,8 @@ uint8_t Memory::read(uint32_t address) {
 
             // DMA, PPU2, hardware registers
             return dmaPPU2AndHardware[offset - 0x4200];
-        } else if (offset >= 0x8000) {
+        }
+        else if (offset >= 0x8000) {
             // LoROM section
             return cartridge->read((bank << 16) | offset);
         }
@@ -128,16 +130,13 @@ uint8_t Memory::read(uint32_t address) {
             return cartridge->read((bank << 16) | offset);
         }
     }
-    else {
-        return 0x00;
-    }
     // TODO other banks and offsets
 
     // Default return
     std::ostringstream oss;
     oss << "Invalid address read: " << std::hex << std::uppercase << address;
     Logger::getInstance()->logError(oss.str());
-    return 0x00;
+    return 0xFF;
 }
 
 void Memory::write(uint32_t address, uint8_t value)
@@ -157,20 +156,17 @@ void Memory::write(uint32_t address, uint8_t value)
             // PPU1, APU, hardware registers
             if (address == 0x2107) {
                 ppu->writeBGBaseAddrScreenSize(0, value);
-                return;
             }
             else if (address == 0x2108) {
                 ppu->writeBGBaseAddrScreenSize(1, value);
-                return;
             }
             else if (address == 0x2109) {
                 ppu->writeBGBaseAddrScreenSize(2, value);
-                return;
             }
             else if (address == 0x210A) {
                 ppu->writeBGBaseAddrScreenSize(3, value);
-                return;
-            } else if (address == 0x2118 || address == 0x2119) {
+            }
+            else if (address == 0x2118 || address == 0x2119) {
                 //https://github.com/LilaQ/q00.snes/blob/master/bus.cpp
                 uint16_t _adr = (memory[0x2117] << 8) | memory[0x2116];
                 uint8_t _v_hi_lo = memory[0x2115] >> 7;
@@ -213,36 +209,29 @@ void Memory::write(uint32_t address, uint8_t value)
                     }
                     memory[0x2116] = _t & 0xff;
                     memory[0x2117] = _t >> 8;
-                    return;
                 }
                 if (address == 0x2118) {
                     ppu->writeVRAMLo(_adr, value);
-                    return;
                 }
                 else {
                     ppu->writeVRAMHi(_adr, value);
-                    return;
                 }
             }
             else if (address == 0x2122) {
                 bool val = ppu->writeCGRAM(memory[0x2121], value);
                 if (val) write(0x2121, read(0x2121) + 1);
-                return;
             }
             else if (address == 0x210B) {
                 // PPU BG/BG2 Tile Base
                 ppu->writeBGTileBase(0, (value & 0xF));
                 ppu->writeBGTileBase(1, (value >> 4));
-                return;
             }
             else if (address == 0x210C) {
                 // PPU BG3/BG4 Tile Base
                 ppu->writeBGTileBase(2, (value & 0xF));
                 ppu->writeBGTileBase(3, (value >> 4));
-                return;
             }
             memory[offset] = value;
-            return;
         }
         else if (offset >= 0x3000 && offset <= 0x3FFF) {
             // DSP, SuperFX, hardware registers
@@ -256,18 +245,11 @@ void Memory::write(uint32_t address, uint8_t value)
         }
         else if (offset >= 0x4200 && offset <= 0x44FF)
         {
-            uint8_t dmaId = ((offset & 0x00F0) >> 4);
-
-            if (offset == 0x420B) {
-                memory[0x420B] = value;
-                if (value > 0) startDMA();
+            if (offset == 0x420b && value > 0) {
+                startDMA();
                 return;
             }
             else memory[offset] = value;
-        }
-        else {
-            memory[address] = value;
-            return;
         }
         // TODO other regions
     }
@@ -287,7 +269,6 @@ void Memory::write(uint32_t address, uint8_t value)
     }
     else {
         memory[bank * 0x8000 + offset] = value;
-        return;
     }
 
     // Log invalid writes
