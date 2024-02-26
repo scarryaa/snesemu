@@ -24,7 +24,7 @@ public:
 	void writeVRAMLo(uint16_t address, uint8_t value);
 	bool writeCGRAM(uint16_t address, uint8_t value);
 	uint16_t readVRAM(uint16_t address);
-	uint16_t readCGRAM(uint16_t address);
+	uint16_t readCGRAM(uint8_t address);
 	void drawBackground2Bpp();
 	void writeBGTileBase(uint8_t id, uint8_t value);
 	void writeBGBaseAddrScreenSize(uint8_t id, uint8_t value);
@@ -65,7 +65,7 @@ private:
 	};
 
 	bool cgramFlipFlop = false;
-	uint8_t cgramLsb;
+	uint8_t cgramLsb = 0;
 
 	// vram, cgram
 	uint16_t vram[0x8000];

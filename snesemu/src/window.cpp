@@ -274,10 +274,14 @@ void Window::renderCgramView(Emulator* emulator) {
     {
         uint16_t addr = line * bytesPerRow;
         ImGui::Text("%06X: ", addr);
-        for (int col = 0; col < bytesPerRow; ++col)
+        for (int col = 0; col < bytesPerRow; col += 1)
         {
             ImGui::SameLine();
-            ImGui::Text("%02X ", ppu->readCGRAM(addr + col));
+            uint16_t value = ppu->readCGRAM(addr + col);
+
+            ImGui::Text("%02X ", (value >> 8) & 0xFF);
+            ImGui::SameLine();
+            ImGui::Text("%02X ", value & 0xFF);
         }
     }
 

@@ -6,7 +6,7 @@ int main(int argv, char** args)
 {
 	Emulator emulator;
 	emulator.openLogFile();
-	emulator.loadRom("roms/CPUADC.sfc");
+	emulator.loadRom("roms/8x8BG1Map2BPP32x328PAL.sfc");
 	emulator.setPCToResetVector();
 	emulator.run();
 
